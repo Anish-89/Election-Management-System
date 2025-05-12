@@ -1,0 +1,419 @@
+{% extends 'voter/voter_dashboard.html' %}
+{% block content %}
+
+<div class="profile-update-container">
+    <div class="profile-header">
+        <h1>Update Voter Profile <i class="fas fa-user-edit"></i></h1>
+        <p>Keep your voter information up to date 🗳️</p>
+    </div>
+
+    <div class="form-wrapper">
+        <form method="POST" enctype="multipart/form-data" id="updateProfileForm" novalidate>
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}"><i class="fas fa-user"></i> Name *</label>
+                {{ form.name }}
+                <span class="error-message" id="name-error"></span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}"><i class="fas fa-envelope"></i> Email *</label>
+                {{ form.email }}
+                <span class="error-message" id="email-error"></span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.phone.id_for_label }}"><i class="fas fa-phone"></i> Phone</label>
+                {{ form.phone }}
+                <span class="error-message" id="phone-error"></span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.address.id_for_label }}"><i class="fas fa-map-marker-alt"></i> Address</label>
+                {{ form.address }}
+                <span class="error-message" id="address-error"></span>
+            </div>
+            <div class="form-group image-upload">
+                <label for="{{ form.profile_image.id_for_label }}"><i class="fas fa-camera"></i> Profile Image</label>
+                {{ form.profile_image }}
+                <div class="image-preview" id="imagePreview">
+                    {% if voter.profile_image %}
+                        <img src="{{ voter.profile_image.url }}" alt="Current Profile Image" class="preview-image">
+                        <button type="button" class="remove-image-btn" onclick="removeImage()">Remove</button>
+                    {% else %}
+                        <p>No image uploaded. Upload a new one to preview.</p>
+                    {% endif %}
+                </div>
+                <span class="error-message" id="profile-image-error"></span>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success" id="saveBtn">
+                    <i class="fas fa-save"></i> <span class="btn-text">Save Changes</span>
+                    <span class="btn-loading" style="display: none;">Saving...</span>
+                </button>
+                <a href="{% url 'voter_profile' voter.id %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- Add custom styles -->
+<style>
+.profile-update-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #ffffff, #f0f4f8);
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.profile-header h1 {
+    color: #1a3c34;
+    font-size: 2.8rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.profile-header p {
+    color: #666;
+    font-size: 1.2rem;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.form-wrapper {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid #007bff;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 1.5rem 2rem; /* Increased padding for larger fields */
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 1.2rem; /* Larger font size */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    background: #f9f9f9;
+    height: 60px; /* Increased height for bigger text boxes */
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 12px rgba(0, 123, 255, 0.6);
+    transform: scale(1.03); /* Enhanced zoom effect */
+}
+
+.form-control.invalid {
+    border-color: #dc3545;
+    animation: shake 0.3s ease-in-out;
+}
+
+.form-group.image-upload .form-control {
+    padding: 0.7rem;
+    height: auto;
+    font-size: 1rem;
+}
+
+.image-preview {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.preview-image {
+    max-width: 180px;
+    max-height: 180px;
+    border-radius: 50%;
+    border: 4px solid #007bff;
+    margin-bottom: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.preview-image:hover {
+    transform: scale(1.15);
+}
+
+.remove-image-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 1rem;
+}
+
+.remove-image-btn:hover {
+    background: #c82333;
+    transform: translateY(-3px);
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 1rem;
+    margin-top: 0.4rem;
+    display: block;
+    min-height: 1.5rem;
+}
+
+.form-actions {
+    margin-top: 3rem;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    padding: 1.2rem 2.5rem; /* Larger button padding */
+    border: none;
+    border-radius: 10px;
+    font-size: 1.3rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    min-width: 160px;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.5);
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(40, 167, 69, 0.7);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    box-shadow: 0 4px 10px rgba(108, 117, 125, 0.5);
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(108, 117, 125, 0.7);
+}
+
+.btn .btn-loading {
+    display: none;
+}
+
+.btn:disabled .btn-text {
+    display: none;
+}
+
+.btn:disabled .btn-loading {
+    display: inline;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-6px); }
+    100% { transform: translateX(0); }
+}
+
+@media (max-width: 768px) {
+    .profile-update-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .form-group label {
+        font-size: 1.1rem;
+    }
+
+    .form-control {
+        font-size: 1.1rem;
+        padding: 1.2rem 1.5rem;
+        height: 55px;
+    }
+
+    .preview-image {
+        max-width: 140px;
+        max-height: 140px;
+    }
+
+    .remove-image-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        font-size: 1.1rem;
+        padding: 1rem 2rem;
+        margin: 0.3rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+}
+</style>
+
+<!-- Add custom JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('updateProfileForm');
+    const saveBtn = document.getElementById('saveBtn');
+    const fields = {
+        name: document.getElementById('id_name'),
+        email: document.getElementById('id_email'),
+        phone: document.getElementById('id_phone'),
+        address: document.getElementById('id_address'),
+        profileImage: document.getElementById('id_profile_image')
+    };
+    const errors = {
+        name: document.getElementById('name-error'),
+        email: document.getElementById('email-error'),
+        phone: document.getElementById('phone-error'),
+        address: document.getElementById('address-error'),
+        profileImage: document.getElementById('profile-image-error')
+    };
+    const imagePreview = document.getElementById('imagePreview');
+
+    // Real-time Validation
+    function validateField(field, value) {
+        let isValid = true;
+        let errorMsg = '';
+
+        switch (field) {
+            case 'name':
+                if (!value.trim()) {
+                    isValid = false;
+                    errorMsg = 'Name is required.';
+                } else if (value.length > 100) {
+                    isValid = false;
+                    errorMsg = 'Name must be 100 characters or fewer.';
+                }
+                break;
+            case 'email':
+                if (!value.trim()) {
+                    isValid = false;
+                    errorMsg = 'Email is required.';
+                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    isValid = false;
+                    errorMsg = 'Enter a valid email address.';
+                }
+                break;
+            case 'phone':
+                if (value && !/^\+?[\d\s-]{10,}$/.test(value)) {
+                    isValid = false;
+                    errorMsg = 'Enter a valid phone number.';
+                }
+                break;
+        }
+
+        errors[field].textContent = errorMsg;
+        fields[field].classList.toggle('invalid', !isValid);
+        return isValid;
+    }
+
+    // Validate all fields on input
+    Object.keys(fields).forEach(field => {
+        if (fields[field]) {
+            fields[field].addEventListener('input', () => {
+                validateField(field, fields[field].value);
+            });
+        }
+    });
+
+    // Image Preview and Removal
+    fields.profileImage.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Profile Image Preview" class="preview-image">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function removeImage() {
+        if (confirm('Are you sure you want to remove the current profile image?')) {
+            imagePreview.innerHTML = '<p>No image uploaded. Upload a new one to preview.</p>';
+            fields.profileImage.value = ''; // Clear the file input
+        }
+    }
+
+    // Form Submission with Confirmation
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        let isValid = true;
+
+        Object.keys(fields).forEach(field => {
+            if (fields[field] && (field === 'name' || field === 'email' || field === 'phone')) {
+                if (!validateField(field, fields[field].value)) {
+                    isValid = false;
+                }
+            }
+        });
+
+        if (isValid) {
+            if (confirm('Are you sure you want to save these changes?')) {
+                saveBtn.disabled = true;
+                saveBtn.querySelector('.btn-text').style.display = 'none';
+                saveBtn.querySelector('.btn-loading').style.display = 'inline';
+                form.submit();
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

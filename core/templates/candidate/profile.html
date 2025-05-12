@@ -1,0 +1,338 @@
+{% extends 'core/candidate_dashboard.html' %}
+{% block content %}
+
+<div class="profile-container">
+    <div class="profile-header">
+        <h1>Candidate Profile</h1>
+        <p>View and manage your candidate details</p>
+    </div>
+
+    <div class="profile-content">
+        <!-- Profile Image Section -->
+        <div class="profile-image-section">
+            {% if candidate.profile_image %}
+                <div class="image-wrapper">
+                    <img src="{{ candidate.profile_image.url }}" alt="Profile Image" class="profile-image" data-fullsize="{{ candidate.profile_image.url }}">
+                    <div class="image-overlay">
+                        <button class="zoom-btn" onclick="zoomImage(this)">Zoom</button>
+                    </div>
+                </div>
+            {% else %}
+                <div class="image-placeholder">
+                    <p>No profile image uploaded.</p>
+                    <button class="upload-btn" onclick="alert('Upload feature not implemented yet.')">Upload Image</button>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Profile Details Section -->
+        <div class="profile-details">
+            <div class="detail-card">
+                <p><strong>Name:</strong> <span class="detail-value">{{ candidate.name }}</span></p>
+            </div>
+            <div class="detail-card">
+                <p><strong>Date of Birth:</strong> <span class="detail-value">{{ candidate.date_of_birth }}</span></p>
+            </div>
+            <div class="detail-card">
+                <p><strong>Address:</strong> <span class="detail-value">{{ candidate.address }}</span></p>
+            </div>
+            <div class="detail-card">
+                <p><strong>Phone:</strong> <span class="detail-value">{{ candidate.phone }}</span></p>
+            </div>
+            <div class="detail-card">
+                <p><strong>Political Party:</strong> <span class="detail-value">{{ candidate.political_party }}</span></p>
+            </div>
+            <div class="detail-card">
+                <p><strong>ID Proof:</strong> 
+                    {% if candidate.id_proof %}
+                        <a href="{{ candidate.id_proof.url }}" class="download-link" onclick="confirmDownload(event)">Download</a>
+                    {% else %}
+                        <span class="detail-value">Not uploaded</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="action-buttons">
+                <a href="{% url 'update_candidate_profile'  %}" class="btn btn-primary">Edit Profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add custom styles -->
+<style>
+.profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.profile-header h1 {
+    color: #1a3c34;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.profile-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.profile-content {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.profile-image-section {
+    flex: 1;
+    min-width: 150px;
+    text-align: center;
+}
+
+.image-wrapper {
+    position: relative;
+    display: inline-block;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #007bff;
+    transition: transform 0.3s ease;
+}
+
+.image-wrapper:hover {
+    transform: scale(1.05);
+}
+
+.profile-image {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    cursor: zoom-in;
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+.image-wrapper:hover .image-overlay {
+    opacity: 1;
+}
+
+.zoom-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.zoom-btn:hover {
+    background: #0056b3;
+}
+
+.image-placeholder {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.upload-btn {
+    margin-top: 1rem;
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.upload-btn:hover {
+    background: #218838;
+}
+
+.profile-details {
+    flex: 2;
+    min-width: 300px;
+}
+
+.detail-card {
+    background: #f8f9fa;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.detail-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.detail-value {
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.download-link {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.download-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.action-buttons {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.zoom-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.zoom-modal.active {
+    display: flex;
+}
+
+.zoom-modal img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.close-btn:hover {
+    background: #c82333;
+}
+
+@media (max-width: 768px) {
+    .profile-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .profile-image-section {
+        margin-bottom: 2rem;
+    }
+
+    .detail-card {
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<!-- Add custom JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const zoomBtn = document.querySelector('.zoom-btn');
+    const closeBtn = document.querySelector('.close-btn');
+    const zoomModal = document.querySelector('.zoom-modal');
+    let zoomedImage = null;
+
+    // Zoom Image Functionality
+    function zoomImage(button) {
+        zoomedImage = button.parentElement.parentElement.querySelector('.profile-image');
+        const modalImg = zoomModal.querySelector('img');
+        modalImg.src = zoomedImage.dataset.fullsize;
+        zoomModal.classList.add('active');
+    }
+
+    // Close Zoom Modal
+    closeBtn.addEventListener('click', () => {
+        zoomModal.classList.remove('active');
+    });
+
+    // Close Modal on Outside Click
+    zoomModal.addEventListener('click', (e) => {
+        if (e.target === zoomModal) {
+            zoomModal.classList.remove('active');
+        }
+    });
+
+    // Confirm Download
+    function confirmDownload(event) {
+        event.preventDefault();
+        if (confirm('Are you sure you want to download the ID proof?')) {
+            window.location.href = event.target.href;
+        }
+    }
+});
+</script>
+
+{% endblock %}

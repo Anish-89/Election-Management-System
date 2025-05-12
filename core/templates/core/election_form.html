@@ -1,0 +1,384 @@
+{% extends 'core/admin_dashboard.html' %}
+{% block content %}
+
+<div class="election-form-container">
+    <div class="election-header">
+        <h1>{{ form.instance.id|yesno:"✏️ Edit Election,➕ Create Election" }}</h1>
+        <p>{{ form.instance.id|yesno:"Update an existing election 🗳️,Create a new election 🗳️" }} with ease</p>
+    </div>
+
+    <div class="form-wrapper">
+        <form method="post" id="electionForm" novalidate>
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}"><i class="fas fa-ballot"></i> Election Name *</label>
+                {{ form.name }}
+                <span class="error-message" id="name-error"></span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.start_date.id_for_label }}"><i class="fas fa-calendar-alt"></i> Start Date *</label>
+                {{ form.start_date }}
+                <span class="error-message" id="start-date-error"></span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.end_date.id_for_label }}"><i class="fas fa-calendar-check"></i> End Date *</label>
+                {{ form.end_date }}
+                <span class="error-message" id="end-date-error"></span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.region.id_for_label }}"><i class="fas fa-map-marker-alt"></i> Region *</label>
+                {{ form.region }}
+                <span class="error-message" id="region-error"></span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.election_type.id_for_label }}"><i class="fas fa-vote-yea"></i> Election Type *</label>
+                {{ form.election_type }}
+                <span class="error-message" id="election-type-error"></span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}"><i class="fas fa-info-circle"></i> Description</label>
+                {{ form.description }}
+                <span class="error-message" id="description-error"></span>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success" id="saveBtn">
+                    <i class="fas fa-save"></i> <span class="btn-text">Save</span>
+                    <span class="btn-loading" style="display: none;">Saving...</span>
+                </button>
+                <a href="{% url 'list_elections' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- Add custom styles -->
+<style>
+.election-form-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #ffffff, #e6f0fa);
+    border-radius: 15px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.election-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.election-header h1 {
+    color: #1a3c34;
+    font-size: 2.8rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.election-header p {
+    color: #666;
+    font-size: 1.2rem;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.form-wrapper {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #007bff;
+}
+
+.form-group {
+    margin-bottom: 1.8rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.7rem;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 1.2rem 1.5rem; /* Increased padding for larger fields */
+    border: 2px solid #ddd;
+    border-radius: 10px; /* Slightly larger radius for a softer look */
+    font-size: 1.1rem; /* Larger font size for better readability */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    background: #f9f9f9;
+    resize: vertical; /* Allow vertical resizing for textarea */
+    min-height: 50px; /* Minimum height for text inputs */
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5); /* Enhanced shadow on focus */
+    transform: scale(1.02); /* Slight zoom effect on focus */
+}
+
+.form-control.invalid {
+    border-color: #dc3545;
+    animation: shake 0.3s ease-in-out; /* Shake animation for invalid fields */
+}
+
+.form-control[type="text"],
+.form-control[type="date"],
+.form-control[multiple] {
+    height: 60px; /* Uniform height for text and select fields */
+}
+
+.form-control[name="description"] {
+    min-height: 150px; /* Larger height for description textarea */
+    padding: 1.5rem 2rem; /* Extra padding for better appearance */
+    font-size: 1.2rem; /* Slightly larger font for description */
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.95rem;
+    margin-top: 0.3rem;
+    display: block;
+    min-height: 1.2rem;
+}
+
+.form-actions {
+    margin-top: 2.5rem;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 1.2rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem 2rem; /* Larger button padding */
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    min-width: 140px;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    box-shadow: 0 3px 8px rgba(40, 167, 69, 0.4);
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    transform: translateY(-4px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.6);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    box-shadow: 0 3px 8px rgba(108, 117, 125, 0.4);
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-4px);
+    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.6);
+}
+
+.btn .btn-loading {
+    display: none;
+}
+
+.btn:disabled .btn-text {
+    display: none;
+}
+
+.btn:disabled .btn-loading {
+    display: inline;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+@media (max-width: 768px) {
+    .election-form-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .form-group label {
+        font-size: 1.1rem;
+    }
+
+    .form-control {
+        font-size: 1rem;
+        padding: 1rem 1.2rem;
+        height: 50px;
+    }
+
+    .form-control[name="description"] {
+        min-height: 120px;
+        padding: 1.2rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .btn {
+        font-size: 1.1rem;
+        padding: 0.9rem 1.7rem;
+        margin: 0.3rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+}
+</style>
+
+<!-- Add custom JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('electionForm');
+    const saveBtn = document.getElementById('saveBtn');
+    const fields = {
+        name: document.getElementById('id_name'),
+        startDate: document.getElementById('id_start_date'),
+        endDate: document.getElementById('id_end_date'),
+        region: document.getElementById('id_region'),
+        electionType: document.getElementById('id_election_type'),
+        description: document.getElementById('id_description')
+    };
+    const errors = {
+        name: document.getElementById('name-error'),
+        startDate: document.getElementById('start-date-error'),
+        endDate: document.getElementById('end-date-error'),
+        region: document.getElementById('region-error'),
+        electionType: document.getElementById('election-type-error'),
+        description: document.getElementById('description-error')
+    };
+
+    // Real-time Validation
+    function validateField(field, value) {
+        let isValid = true;
+        let errorMsg = '';
+
+        switch (field) {
+            case 'name':
+                if (!value.trim()) {
+                    isValid = false;
+                    errorMsg = 'Election name is required.';
+                } else if (value.length > 100) {
+                    isValid = false;
+                    errorMsg = 'Name must be 100 characters or fewer.';
+                }
+                break;
+            case 'startDate':
+                if (!value) {
+                    isValid = false;
+                    errorMsg = 'Start date is required.';
+                }
+                break;
+            case 'endDate':
+                if (!value) {
+                    isValid = false;
+                    errorMsg = 'End date is required.';
+                } else if (value <= fields.startDate.value) {
+                    isValid = false;
+                    errorMsg = 'End date must be after start date.';
+                }
+                break;
+            case 'region':
+                if (!value.trim()) {
+                    isValid = false;
+                    errorMsg = 'Region is required.';
+                }
+                break;
+            case 'electionType':
+                if (!value) {
+                    isValid = false;
+                    errorMsg = 'Election type is required.';
+                }
+                break;
+        }
+
+        errors[field].textContent = errorMsg;
+        fields[field].classList.toggle('invalid', !isValid);
+        return isValid;
+    }
+
+    // Validate all fields on input
+    Object.keys(fields).forEach(field => {
+        fields[field].addEventListener('input', () => {
+            validateField(field, fields[field].value);
+        });
+    });
+
+    // Form Submission with Confirmation
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        let isValid = true;
+
+        Object.keys(fields).forEach(field => {
+            if (!validateField(field, fields[field].value)) {
+                isValid = false;
+            }
+        });
+
+        if (isValid) {
+            if (confirm('Are you sure you want to save this election?')) {
+                saveBtn.disabled = true;
+                saveBtn.querySelector('.btn-text').style.display = 'none';
+                saveBtn.querySelector('.btn-loading').style.display = 'inline';
+                form.submit();
+            }
+        }
+    });
+
+    // Enhance Date Pickers
+    [fields.startDate, fields.endDate].forEach(input => {
+        input.addEventListener('focus', function() {
+            this.type = 'date';
+        });
+        input.addEventListener('blur', function() {
+            if (!this.value) this.type = 'text';
+        });
+    });
+});
+</script>
+
+{% endblock %}

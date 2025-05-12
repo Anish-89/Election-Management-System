@@ -1,0 +1,153 @@
+{% extends 'core/admin_dashboard.html' %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        tr:hover {
+            background: #f1f1f1;
+        }
+        .actions a {
+            color: red;
+            margin-right: 10px;
+            text-decoration: none;
+        }
+        .actions a:hover {
+            text-decoration: underline;
+        }
+        .search-box {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .search-box input {
+            width: 60%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .verify-btn {
+            background: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<div class="container">
+    <h1>Candidate Management</h1>
+    <div class="search-box">
+        <input type="text" id="search" placeholder="Search candidates...">
+    </div>
+    <table id="candidateTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Name</th>
+                <th onclick="sortTable(1)">Email</th>
+                <th onclick="sortTable(2)">Election</th>
+                <th onclick="sortTable(3)">Party</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for candidate in candidates %}
+            <tr>
+                <td>{{ candidate.name }}</td>
+                <td>{{ candidate.email }}</td>
+                <td>{{ candidate.election_type }}</td>
+                <td>{{ candidate.political_party }}</td>
+                <td>{{ candidate.verification_status }}</td>
+                <td class="actions">
+                    <a href="{% url 'candidate_delete' candidate.pk %}" onclick="return confirm('Are you sure?')">
+                        <i class="fa fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No candidates found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="container">
+    <h2>Pending Verifications</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Election</th>
+                <th>Party</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for candidate in candidates %}
+                {% if candidate.verification_status == "Pending" %}
+                <tr>
+                    <td>{{ candidate.name }}</td>
+                    <td>{{ candidate.email }}</td>
+                    <td>{{ candidate.election_type }}</td>
+                    <td>{{ candidate.political_party }}</td>
+                    <td>
+                        <button class="verify-btn" onclick="location.href='{% url 'verify_candidate' candidate.id %}'">Verify</button>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    function sortTable(n) {
+        let table = document.getElementById("candidateTable");
+        let rows = Array.from(table.rows).slice(1);
+        rows.sort((a, b) => a.cells[n].innerText.localeCompare(b.cells[n].innerText));
+        rows.forEach(row => table.appendChild(row));
+    }
+    
+    document.getElementById("search").addEventListener("keyup", function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll("#candidateTable tbody tr");
+        rows.forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}

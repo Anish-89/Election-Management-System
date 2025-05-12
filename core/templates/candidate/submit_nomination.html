@@ -1,0 +1,657 @@
+{% extends 'core/candidate_dashboard.html' %}
+{% block content %}
+<div class="nomination-container">
+    <div class="nomination-header">
+      <h1>Submit Your Nomination</h1>
+      <p class="subtitle">Complete the form below to submit your candidacy</p>
+    </div>
+  
+    <div class="nomination-progress">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="step active" id="step1">Personal Info</div>
+        <div class="step" id="step2">Position Details</div>
+        <div class="step" id="step3">Confirmation</div>
+      </div>
+    </div>
+  
+    <form method="post" enctype="multipart/form-data" id="nominationForm" class="nomination-form">
+      {% csrf_token %}
+      
+      <!-- Step 1: Personal Information -->
+      <div class="form-section active" id="section1">
+        <h2>Personal Information</h2>
+        
+        <div class="form-group">
+          {{ form.full_name.label_tag }}
+          {{ form.full_name }}
+          <div class="form-hint">Enter your legal name as it appears on official documents</div>
+        </div>
+  
+        <div class="form-group">
+          {{ form.email.label_tag }}
+          {{ form.email }}
+        </div>
+  
+        <div class="form-group">
+          {{ form.phone_number.label_tag }}
+          {{ form.phone_number }}
+        </div>
+  
+        <div class="form-group">
+          {{ form.date_of_birth.label_tag }}
+          {{ form.date_of_birth }}
+        </div>
+        
+        <div class="button-group">
+          <button type="button" class="btn next-btn" id="toStep2">Next: Position Details</button>
+        </div>
+      </div>
+      
+      <!-- Step 2: Position Details -->
+      <div class="form-section" id="section2">
+        <h2>Position Details</h2>
+        
+        <div class="form-group">
+          {{ form.election.label_tag }}
+          {{ form.election }}
+        </div>
+  
+        <div class="form-group">
+          {{ form.position_applied_for.label_tag }}
+          {{ form.position_applied_for }}
+        </div>
+  
+        <div class="form-group">
+          {{ form.department.label_tag }}
+          {{ form.department }}
+        </div>
+  
+        <div class="form-group">
+          {{ form.photo.label_tag }}
+          {{ form.photo }}
+        </div>
+  
+        <div class="form-group">
+          {{ form.statement_of_purpose.label_tag }}
+          {{ form.statement_of_purpose }}
+          <div class="char-counter"><span id="charCount">0</span>/500 characters</div>
+        </div>
+        
+        <div class="button-group">
+          <button type="button" class="btn back-btn" id="backToStep1">Back</button>
+          <button type="button" class="btn next-btn" id="toStep3">Next: Confirm</button>
+        </div>
+      </div>
+      
+      <!-- Step 3: Confirmation -->
+      <div class="form-section" id="section3">
+        <h2>Confirm Your Nomination</h2>
+        
+        <div class="form-summary" id="formSummary">
+          <!-- Dynamically filled by JavaScript -->
+        </div>
+        
+        <div class="form-group checkbox-group">
+          <div class="checkbox-item">
+            {{ form.eligibility_declaration }}
+            {{ form.eligibility_declaration.label_tag }}
+          </div>
+          
+          <div class="checkbox-item">
+            {{ form.code_of_conduct_agreement }}
+            {{ form.code_of_conduct_agreement.label_tag }}
+          </div>
+          
+          <div class="checkbox-item">
+            {{ form.final_declaration }}
+            {{ form.final_declaration.label_tag }}
+          </div>
+        </div>
+        
+        <div class="button-group">
+          <button type="button" class="btn back-btn" id="backToStep2">Back</button>
+          <button type="submit" class="btn submit-btn" id="submitNomination">Submit Nomination</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>  
+<style>
+:root {
+  --primary: #1a56db;
+  --primary-light: #3b82f6;
+  --primary-dark: #1e429f;
+  --secondary: #e5edff;
+  --success: #0e9f6e;
+  --error: #e02424;
+  --warning: #ff5a1f;
+  --background: #f9fafb;
+  --text: #1f2937;
+  --text-light: #6b7280;
+  --border: #d1d5db;
+  --border-focus: #3b82f6;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+.nomination-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.nomination-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.nomination-header h1 {
+  color: var(--primary);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+/* Progress Bar */
+.nomination-progress {
+  margin-bottom: 2rem;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: var(--secondary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--primary);
+  width: 33.33%;
+  transition: width 0.3s ease;
+}
+
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+}
+
+.step {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  position: relative;
+  flex: 1;
+  text-align: center;
+}
+
+.step.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.step.completed {
+  color: var(--success);
+}
+
+/* Form Sections */
+.form-section {
+  display: none;
+  animation: fadeIn 0.5s;
+}
+
+.form-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.form-section h2 {
+  color: var(--text);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 1rem;
+  color: var(--text);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.form-hint {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin-top: 0.25rem;
+}
+
+/* File Upload */
+.file-upload {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.file-input {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.file-upload-placeholder {
+  flex-grow: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px 0 0 4px;
+  color: var(--text-light);
+  background-color: var(--background);
+  display: flex;
+  align-items: center;
+}
+
+.upload-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12' /%3E%3C/svg%3E");
+  background-size: contain;
+}
+
+.browse-btn {
+  border-radius: 0 4px 4px 0;
+  background-color: var(--primary);
+  color: white;
+  padding: 0.75rem 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.preview-container {
+  margin-top: 1rem;
+  max-width: 200px;
+}
+
+.preview-container img {
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+/* Character Counter */
+.char-counter {
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin-top: 0.25rem;
+}
+
+/* Checkbox Styles */
+.checkbox-group {
+  margin-top: 1.5rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin-top: 0.25rem;
+  margin-right: 0.75rem;
+}
+
+.checkbox-item label {
+  margin-bottom: 0;
+}
+
+/* Button Styles */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.next-btn, .submit-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+}
+
+.next-btn:hover, .submit-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+.back-btn {
+  background-color: white;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.back-btn:hover {
+  background-color: var(--background);
+}
+
+/* Form Summary */
+.form-summary {
+  background-color: var(--background);
+  padding: 1.5rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.summary-item {
+  margin-bottom: 1rem;
+  display: flex;
+}
+
+.summary-label {
+  font-weight: 600;
+  min-width: 200px;
+  color: var(--text);
+}
+
+.summary-value {
+  color: var(--text);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .nomination-container {
+    padding: 1.5rem;
+  }
+  
+  .button-group {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .summary-item {
+    flex-direction: column;
+  }
+  
+  .summary-label {
+    min-width: auto;
+    margin-bottom: 0.25rem;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Form navigation
+  const progressFill = document.getElementById('progressFill');
+  const section1 = document.getElementById('section1');
+  const section2 = document.getElementById('section2');
+  const section3 = document.getElementById('section3');
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const step3 = document.getElementById('step3');
+  
+  // Next buttons
+  const toStep2 = document.getElementById('toStep2');
+  const toStep3 = document.getElementById('toStep3');
+  
+  // Back buttons
+  const backToStep1 = document.getElementById('backToStep1');
+  const backToStep2 = document.getElementById('backToStep2');
+  
+  // Form inputs for validation
+  const fullNameInput = document.getElementById('id_full_name');
+  const emailInput = document.getElementById('id_email');
+  const phoneInput = document.getElementById('id_phone');
+  const dobInput = document.getElementById('id_dob');
+  const electionSelect = document.getElementById('id_election');
+  const positionInput = document.getElementById('id_position');
+  const departmentInput = document.getElementById('id_department');
+  
+  // Move to step 2
+  toStep2.addEventListener('click', function() {
+    // Validate first section
+    if (!fullNameInput.value || !emailInput.value || !phoneInput.value || !dobInput.value) {
+      alert('Please complete all required fields.');
+      return;
+    }
+    
+    // Email validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(emailInput.value)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    
+    section1.classList.remove('active');
+    section2.classList.add('active');
+    progressFill.style.width = '66.66%';
+    
+    step1.classList.add('completed');
+    step2.classList.add('active');
+  });
+  
+  // Move to step 3
+  toStep3.addEventListener('click', function() {
+    // Validate second section
+    if (!electionSelect.value || !positionInput.value || !departmentInput.value) {
+      alert('Please complete all required fields.');
+      return;
+    }
+    
+    section2.classList.remove('active');
+    section3.classList.add('active');
+    progressFill.style.width = '100%';
+    
+    step2.classList.add('completed');
+    step3.classList.add('active');
+    
+    // Populate form summary
+    const formSummary = document.getElementById('formSummary');
+    formSummary.innerHTML = `
+      <div class="summary-item">
+        <div class="summary-label">Full Name:</div>
+        <div class="summary-value">${fullNameInput.value}</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Email Address:</div>
+        <div class="summary-value">${emailInput.value}</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Phone Number:</div>
+        <div class="summary-value">${phoneInput.value}</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Date of Birth:</div>
+        <div class="summary-value">${dobInput.value}</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Election:</div>
+        <div class="summary-value">${electionSelect.options[electionSelect.selectedIndex].text}</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Position Applied For:</div>
+        <div class="summary-value">${positionInput.value}</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Department/Team:</div>
+        <div class="summary-value">${departmentInput.value}</div>
+      </div>
+    `;
+    
+    const photoPreview = document.getElementById('photoPreview');
+    if (photoPreview.innerHTML) {
+      formSummary.innerHTML += `
+        <div class="summary-item">
+          <div class="summary-label">Photo:</div>
+          <div class="summary-value">${photoPreview.innerHTML}</div>
+        </div>
+      `;
+    }
+    
+    const statement = document.getElementById('id_statement').value;
+    if (statement) {
+      formSummary.innerHTML += `
+        <div class="summary-item">
+          <div class="summary-label">Statement of Purpose:</div>
+          <div class="summary-value">${statement}</div>
+        </div>
+      `;
+    }
+  });
+  
+  // Go back to step 1
+  backToStep1.addEventListener('click', function() {
+    section2.classList.remove('active');
+    section1.classList.add('active');
+    progressFill.style.width = '33.33%';
+    
+    step2.classList.remove('active');
+  });
+  
+  // Go back to step 2
+  backToStep2.addEventListener('click', function() {
+    section3.classList.remove('active');
+    section2.classList.add('active');
+    progressFill.style.width = '66.66%';
+    
+    step3.classList.remove('active');
+    step2.classList.remove('completed');
+  });
+  
+  // File upload preview
+  const fileInput = document.getElementById('id_photo');
+  const fileNameDisplay = document.getElementById('file-name');
+  const photoPreview = document.getElementById('photoPreview');
+  const browseButton = document.querySelector('.browse-btn');
+  
+  browseButton.addEventListener('click', function() {
+    fileInput.click();
+  });
+  
+  fileInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+      const file = this.files[0];
+      fileNameDisplay.textContent = file.name;
+      
+      // Check file size
+      if (file.size > 2 * 1024 * 1024) {
+        alert('File size exceeds 2MB. Please choose a smaller file.');
+        fileInput.value = '';
+        fileNameDisplay.textContent = 'Choose a file';
+        photoPreview.innerHTML = '';
+        return;
+      }
+      
+      // Check file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!validTypes.includes(file.type)) {
+        alert('Invalid file type. Please select a JPG or PNG image.');
+        fileInput.value = '';
+        fileNameDisplay.textContent = 'Choose a file';
+        photoPreview.innerHTML = '';
+        return;
+      }
+      
+      // Preview image
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        photoPreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  
+  // Character counter for statement
+  const statementTextarea = document.getElementById('id_statement');
+  const charCount = document.getElementById('charCount');
+  
+  statementTextarea.addEventListener('input', function() {
+    const count = this.value.length;
+    charCount.textContent = count;
+    
+    if (count > 500) {
+      charCount.style.color = 'var(--error)';
+      this.value = this.value.substring(0, 500);
+      charCount.textContent = 500;
+    } else {
+      charCount.style.color = 'var(--text-light)';
+    }
+  });
+  
+  // Form submission
+  const form = document.getElementById('nominationForm');
+  const submitBtn = document.getElementById('submitNomination');
+  
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Check if checkboxes are checked
+    const eligibilityCheckbox = document.getElementById('id_eligibility');
+    const rulesCheckbox = document.getElementById('id_rules');
+    const accurateCheckbox = document.getElementById('id_accurate');
+    
+    if (!eligibilityCheckbox.checked || !rulesCheckbox.checked || !accurateCheckbox.checked) {
+      alert('Please confirm all required checkboxes before submitting.');
+      return;
+    }
+    
+    // Show loading state
+    submitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
+    submitBtn.disabled = true;
+    
+    // Simulate form submission (remove setTimeout in real implementation)
+    setTimeout(function() {
+      // In a real implementation, submit the form here
+      form.submit();
+    }, 1500);
+  });
+});
+</script>
+{% endblock %}

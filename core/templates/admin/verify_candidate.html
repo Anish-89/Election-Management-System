@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Verify Candidate</title>
+</head>
+<body>
+    <h1>Verify Candidate</h1>
+    <p><strong>Name:</strong> {{ candidate.name }}</p>
+    <p><strong>Email:</strong> {{ candidate.email }}</p>
+    <p><strong>Uploaded Documents:</strong>
+        {% if candidate.documents %}
+            <a href="{{ candidate.documents.url }}" target="_blank">View Document</a>
+        {% else %}
+            No documents uploaded.
+        {% endif %}
+    </p>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="verification_status">Verification Status:</label>
+        <select name="verification_status" id="verification_status">
+            <option value="Pending" {% if candidate.verification_status == "Pending" %}selected{% endif %}>Pending</option>
+            <option value="Approved" {% if candidate.verification_status == "Approved" %}selected{% endif %}>Approved</option>
+            <option value="Rejected" {% if candidate.verification_status == "Rejected" %}selected{% endif %}>Rejected</option>
+        </select>
+        <br>
+        <label for="verification_notes">Notes:</label>
+        <textarea name="verification_notes" id="verification_notes">{{ candidate.verification_notes }}</textarea>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

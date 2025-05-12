@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Registration</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .progress-bar {
+            display: flex;
+            margin: 20px 0;
+            padding: 0 40px;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background-color: var(--light-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 5px;
+            color: var(--dark-color);
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step.active .step-number {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .progress-step.completed .step-number {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .progress-step.completed .step-number::after {
+            content: '✓';
+        }
+
+        .step-label {
+            font-size: 14px;
+            color: var(--dark-color);
+        }
+
+        .progress-step.active .step-label {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 60%;
+            width: 80%;
+            height: 2px;
+            background-color: var(--light-color);
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+
+        .form-col {
+            padding: 0 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .file-input-container {
+            position: relative;
+            margin-top: 5px;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px 15px;
+            background-color: var(--light-color);
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .file-input-label:hover {
+            background-color: #dfe6e9;
+        }
+
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-name {
+            margin-top: 5px;
+            font-size: 14px;
+            color: var(--dark-color);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+
+        .btn-link {
+            background: none;
+            color: var(--secondary-color);
+            text-decoration: none;
+            padding: 12px 0;
+        }
+
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .otp-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .otp-message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .otp-message.success {
+            display: block;
+            background-color: rgba(46, 204, 113, 0.2);
+            color: #27ae60;
+        }
+
+        .otp-message.error {
+            display: block;
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+
+        .avatar-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 10px auto;
+            border: 3px solid #eee;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-placeholder {
+            font-size: 50px;
+            color: #ccc;
+        }
+
+        .messages {
+            list-style: none;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+
+        .messages li {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            color: white;
+            background-color: var(--secondary-color);
+        }
+
+        .home-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--dark-color);
+            text-decoration: none;
+        }
+
+        .home-link:hover {
+            color: var(--secondary-color);
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-col {
+                min-width: 100%;
+                margin-bottom: 15px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Candidate Registration</h1>
+            <p>Complete the form to register as a candidate</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-label">Personal Info</div>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-label">Contact Details</div>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-label">Verification</div>
+            </div>
+        </div>
+        <form method="POST" enctype="multipart/form-data" id="CandidateRegistrationForm">
+            {% csrf_token %}
+        
+            <div class="form-container">
+                <!-- Step 1: Personal Information -->
+                <div class="form-section active" data-step="1">
+                    <h2>Personal Information</h2>
+        
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="{{ form.student_id.id_for_label }}">Student ID:</label>
+                                {{ form.student_id }}
+                                {% if form.student_id.errors %}
+                                    <div class="error-message">{{ form.student_id.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="{{ form.name.id_for_label }}">Full Name:</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="error-message">{{ form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth:</label>
+                        {{ form.date_of_birth }}
+                        {% if form.date_of_birth.errors %}
+                            <div class="error-message">{{ form.date_of_birth.errors }}</div>
+                        {% endif %}
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="{{ form.profile_image.id_for_label }}">Profile Image:</label>
+                        <div class="avatar-preview">
+                            <div class="avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <img id="avatar-preview-img" src="" alt="" style="display: none;">
+                        </div>
+                        <div class="file-input-container">
+                            <label class="file-input-label">
+                                <i class="fas fa-upload"></i> Choose File
+                                {{ form.profile_image }}
+                            </label>
+                            <div class="file-name" id="profile-image-name">No file chosen</div>
+                        </div>
+                    </div>
+        
+                    <div class="form-actions">
+                        <div></div>
+                        <button type="button" class="btn btn-primary next-step" data-next="2">Next <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+        
+                <!-- Step 2: Contact Information -->
+                <div class="form-section" data-step="2">
+                    <h2>Contact Information</h2>
+        
+                    <div class="form-group">
+                        <label for="{{ form.address.id_for_label }}">Address:</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <div class="error-message">{{ form.address.errors }}</div>
+                        {% endif %}
+                    </div>
+        
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="{{ form.email.id_for_label }}">Email:</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="error-message">{{ form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="{{ form.phone.id_for_label }}">Phone:</label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                    <div class="error-message">{{ form.phone.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="{{ form.political_party.id_for_label }}">Political Party:</label>
+                        {{ form.political_party }}
+                        {% if form.political_party.errors %}
+                            <div class="error-message">{{ form.political_party.errors }}</div>
+                        {% endif %}
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="{{ form.election_type.id_for_label }}">Election Type:</label>
+                        {{ form.election_type }}
+                        {% if form.election_type.errors %}
+                            <div class="error-message">{{ form.election_type.errors }}</div>
+                        {% endif %}
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="{{ form.id_proof.id_for_label }}">ID Proof Document:</label>
+                        <div class="file-input-container">
+                            <label class="file-input-label">
+                                <i class="fas fa-file-upload"></i> Choose File
+                                {{ form.id_proof }}
+                            </label>
+                            <div class="file-name" id="id-proof-name">No file chosen</div>
+                        </div>
+                    </div>
+        
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-link prev-step" data-prev="1"><i class="fas fa-arrow-left"></i> Previous</button>
+                        <button type="button" class="btn btn-primary next-step" data-next="3">Next <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+        
+                <!-- Step 3: Verification -->
+                <div class="form-section" data-step="3">
+                    <h2>Verification</h2>
+                    <p>Please verify your identity using OTP sent to your registered email/phone.</p>
+                    <div class="form-group">
+                        <label for="{{ form.otp.id_for_label }}">OTP:</label>
+                        <div class="otp-container">
+                            {{ form.otp }}
+                            <button type="button" id="sendOtpBtn" class="btn btn-warning">Send OTP</button>
+
+                        </div>
+                        {% if form.otp.errors %}
+                            <div class="error-message">{{ form.otp.errors }}</div>
+                        {% endif %}
+                        <div id="otpMessage" class="otp-message"></div> <!-- Add this line -->
+                    </div>
+        
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" id="terms" name="terms" class="form-check-input" required>
+                            <label for="terms" class="form-check-label">I agree to the terms and conditions</label>
+                        </div>
+                    </div>
+        
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-link prev-step" data-prev="2"><i class="fas fa-arrow-left"></i> Previous</button>
+                        <button type="submit" class="btn btn-success">Complete Registration <i class="fas fa-check"></i></button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    
+    <a href="{% url 'home' %}" class="home-link">
+        <i class="fas fa-home"></i> Back to Home
+    </a>
+    
+    <script>
+         
+        // Multi-step form navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            const sendOtpUrl = "{% url 'send_otp' %}";
+            // Next step buttons
+            const nextButtons = document.querySelectorAll('.next-step');
+            nextButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const currentStep = parseInt(this.closest('.form-section').dataset.step);
+                    const nextStep = parseInt(this.dataset.next);
+                    
+                    // Simple validation
+                    if (validateStep(currentStep)) {
+                        // Hide current step
+                        document.querySelector(`.form-section[data-step="${currentStep}"]`).classList.remove('active');
+                        // Show next step
+                        document.querySelector(`.form-section[data-step="${nextStep}"]`).classList.add('active');
+                        
+                        // Update progress bar
+                        updateProgressBar(nextStep);
+                    }
+                });
+            });
+            
+            // Previous step buttons
+            const prevButtons = document.querySelectorAll('.prev-step');
+            prevButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const currentStep = parseInt(this.closest('.form-section').dataset.step);
+                    const prevStep = parseInt(this.dataset.prev);
+                    
+                    // Hide current step
+                    document.querySelector(`.form-section[data-step="${currentStep}"]`).classList.remove('active');
+                    // Show previous step
+                    document.querySelector(`.form-section[data-step="${prevStep}"]`).classList.add('active');
+                    
+                    // Update progress bar
+                    updateProgressBar(prevStep);
+                });
+            });
+            
+            // Update progress bar
+            function updateProgressBar(activeStep) {
+                const steps = document.querySelectorAll('.progress-step');
+                steps.forEach(step => {
+                    const stepNum = parseInt(step.dataset.step);
+                    step.classList.remove('active', 'completed');
+                    
+                    if (stepNum === activeStep) {
+                        step.classList.add('active');
+                    } else if (stepNum < activeStep) {
+                        step.classList.add('completed');
+                    }
+                });
+            }
+            
+            // Form validation
+            function validateStep(step) {
+                const section = document.querySelector(`.form-section[data-step="${step}"]`);
+                const requiredFields = section.querySelectorAll('[required]');
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+                
+                return isValid;
+            }
+            
+            // File input handling
+            const profileImageInput = document.getElementById('id_profile_image');
+            const profileImageName = document.getElementById('profile-image-name');
+            const avatarPreviewImg = document.getElementById('avatar-preview-img');
+            const avatarPlaceholder = document.querySelector('.avatar-placeholder');
+            
+            profileImageInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    profileImageName.textContent = this.files[0].name;
+                    
+                    // Show image preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarPreviewImg.src = e.target.result;
+                        avatarPreviewImg.style.display = 'block';
+                        avatarPlaceholder.style.display = 'none';
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                } else {
+                    profileImageName.textContent = 'No file chosen';
+                    avatarPreviewImg.style.display = 'none';
+                    avatarPlaceholder.style.display = 'flex';
+                }
+            });
+            
+            const idProofInput = document.getElementById('id_id_proof');
+            const idProofName = document.getElementById('id-proof-name');
+            
+            idProofInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    idProofName.textContent = this.files[0].name;
+                } else {
+                    idProofName.textContent = 'No file chosen';
+                }
+            });
+            
+            // OTP handling
+          // OTP handling
+const sendOtpBtn = document.getElementById("sendOtpBtn");
+const otpMessage = document.getElementById("otpMessage");
+
+if (sendOtpBtn) {
+    sendOtpBtn.addEventListener("click", function() {
+        console.log("Send OTP button clicked");
+        const studentId = document.getElementById("student_id").value;
+
+        if (!studentId) {
+    otpMessage.textContent = "Please enter your Student ID";
+    otpMessage.className = "otp-message error";
+    return;
+}
+
+        // Simulate OTP sending
+        otpMessage.textContent = "Processing...";
+        otpMessage.className = "otp-message";
+
+        // Fetch OTP from server
+        fetch(`${sendOtpUrl}?student_id=${studentId}`)
+
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    otpMessage.textContent = data.message || "OTP sent successfully to your registered email/phone!";
+                    otpMessage.className = "otp-message success";
+
+                    // Start countdown
+                    let countdown = 60;
+                    sendOtpBtn.disabled = true;
+                    const timer = setInterval(() => {
+                        sendOtpBtn.textContent = `Resend (${countdown}s)`;
+                        countdown--;
+
+                        if (countdown < 0) {
+                            clearInterval(timer);
+                            sendOtpBtn.disabled = false;
+                            sendOtpBtn.textContent = "Send OTP";
+                        }
+                    }, 1000);
+                } else {
+                    otpMessage.textContent = data.message || "Failed to send OTP.";
+                    otpMessage.className = "otp-message error";
+                }
+            })
+            .catch(error => {
+                console.error("OTP request failed:", error);
+                otpMessage.textContent = "Failed to send OTP. Please try again.";
+                otpMessage.className = "otp-message error";
+            });
+    });
+} else {
+    console.error("Send OTP button not found in DOM");
+}
+            
+            // Form submission
+            const form = document.getElementById('CandidateRegistrationForm');
+            form.addEventListener('submit', function(e) {
+                if (!validateStep(3)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

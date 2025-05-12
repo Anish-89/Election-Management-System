@@ -1,0 +1,12 @@
+{% extends 'core/candidate_dashboard.html' %}
+{% block content %}
+<h1>Election Results</h1>
+<ul>
+  {% for election in elections %}
+  <li>
+    <strong>{{ election.title }}</strong> - {{ election.date }}
+    <p>Winner: {{ election.winner.name }}</p>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

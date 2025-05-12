@@ -1,0 +1,29 @@
+{% extends 'core/home.html' %}
+
+{% block content %}
+<div class="contact">
+    <h2>Contact Us</h2>
+    <p>Have questions or need assistance? Reach out to us!</p>
+
+    <!-- Display success or error messages -->
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+
+    <blockquote>
+        "Elections belong to the people. It's their decision." – Abraham Lincoln
+    </blockquote>
+
+    
+</div>
+{% endblock %}

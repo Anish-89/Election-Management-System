@@ -1,0 +1,202 @@
+{% extends 'core/admin_dashboard.html' %}
+
+{% block content %}
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 50%, #138808 100%);
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+    h1 {
+        color: #FF9933;
+        margin-bottom: 20px;
+        font-size: 32px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    button {
+        background-color: #138808;
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    button:hover {
+        background-color: #0F6206;
+        transform: scale(1.1);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+    .results-section {
+        display: none;
+        width: 90%;
+        max-width: 1000px;
+        margin: 20px auto;
+        animation: fadeIn 0.5s ease-in;
+    }
+    .active {
+        display: block;
+    }
+    .result-box {
+        background: #FFFFFF;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 25px;
+        border-left: 6px solid #FF9933;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .result-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    h2 {
+        color: #FF9933;
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        background: #F9F9F9;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: center;
+        color: #333;
+    }
+    th {
+        background-color: #FF9933;
+        color: white;
+        font-weight: 600;
+    }
+    a {
+        text-decoration: none;
+        color: #138808;
+        font-weight: bold;
+        transition: color 0.3s ease;
+    }
+    a:hover {
+        color: #0F6206;
+        text-decoration: underline;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @media (max-width: 768px) {
+        h1 { font-size: 24px; }
+        button { padding: 10px 20px; font-size: 14px; }
+        .results-section { width: 95%; }
+        .result-box { padding: 15px; }
+    }
+</style>
+
+<h1>Election Results</h1>
+<div class="button-container">
+    <button onclick="showResults('new_results')">New Results</button>
+    <button onclick="showResults('past_results')">Past Results</button>
+</div>
+
+<div id="new_results" class="results-section active">
+    <h2>New Results</h2>
+    {% if new_results %}
+        {% for election in new_results %}
+            <div class="result-box">
+                <h3>{{ election.name }} - {{ election.election_type }}</h3>
+                <p><strong>Total Voters:</strong> {{ election.total_voters }}</p>
+                <p><strong>Total Votes Cast:</strong> {{ election.total_votes_cast }}</p>
+                {% if election.winner %}
+                    <p><strong>Winner:</strong> {{ election.winner.name }}</p>
+                {% else %}
+                    <p><strong>Winner:</strong> Not yet determined</p>
+                {% endif %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Candidate Name</th>
+                            <th>Votes Received</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in election.results %}
+                            <tr>
+                                <td>{{ result.candidate__name }}</td>
+                                <td>{{ result.total_votes }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="2">No votes recorded.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <a href="{% url 'result_detail' election.id %}">View Detailed Results</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No new results available.</p>
+    {% endif %}
+</div>
+
+<div id="past_results" class="results-section">
+    <h2>Past Results</h2>
+    {% if past_results %}
+        {% for election in past_results %}
+            <div class="result-box">
+                <h3>{{ election.name }} - {{ election.election_type }}</h3>
+                <p><strong>Total Voters:</strong> {{ election.total_voters }}</p>
+                <p><strong>Total Votes Cast:</strong> {{ election.total_votes_cast }}</p>
+                {% if election.winner %}
+                    <p><strong>Winner:</strong> {{ election.winner.name }}</p>
+                {% else %}
+                    <p><strong>Winner:</strong> Not yet determined</p>
+                {% endif %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Candidate Name</th>
+                            <th>Votes Received</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in election.results %}
+                            <tr>
+                                <td>{{ result.candidate__name }}</td>
+                                <td>{{ result.total_votes }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="2">No votes recorded.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <a href="{% url 'result_detail' election.id %}">View Detailed Results</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No past results available.</p>
+    {% endif %}
+</div>
+
+<script>
+function showResults(sectionId) {
+    document.querySelectorAll('.results-section').forEach(div => div.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+}
+</script>
+{% endblock %}

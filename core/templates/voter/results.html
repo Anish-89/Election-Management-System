@@ -1,0 +1,387 @@
+{% extends 'voter/voter_dashboard.html' %}
+
+{% block content %}
+<div class="results-container">
+    <div class="results-header">
+        <h1>Election Results <i class="fas fa-trophy"></i></h1>
+        <p>View the outcomes of elections 🗳️</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-button active" onclick="showResults('new_results')" data-section="new_results">New Results</button>
+        <button class="tab-button" onclick="showResults('past_results')" data-section="past_results">Past Results</button>
+    </div>
+
+    <!-- New Results Section -->
+    <div id="new_results" class="results-section">
+        <h2>New Results</h2>
+        {% if new_results %}
+            <div class="results-grid">
+                {% for election in new_results %}
+                    <div class="result-card">
+                        <h3>{{ election.name }} - {{ election.election_type }}</h3>
+                        <p><i class="fas fa-users"></i> <strong>Total Voters:</strong> {{ election.total_voters }}</p>
+                        <p><i class="fas fa-vote-yea"></i> <strong>Total Votes Cast:</strong> {{ election.total_votes_cast }}</p>
+                        {% if election.winner %}
+                            <p><i class="fas fa-crown"></i> <strong>Winner:</strong> {{ election.winner.name }}</p>
+                        {% else %}
+                            <p><i class="fas fa-hourglass"></i> <strong>Winner:</strong> Not yet determined</p>
+                        {% endif %}
+                        <div class="results-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Candidate Name</th>
+                                        <th>Votes Received</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in election.results %}
+                                        <tr>
+                                            <td>{{ result.candidate__name }}</td>
+                                            <td>{{ result.total_votes }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="2">No votes recorded.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-data">No new results available.</p>
+        {% endif %}
+    </div>
+
+    <!-- Past Results Section -->
+    <div id="past_results" class="results-section">
+        <h2>Past Results</h2>
+        {% if past_results %}
+            <div class="results-grid">
+                {% for election in past_results %}
+                    <div class="result-card">
+                        <h3>{{ election.name }} - {{ election.election_type }}</h3>
+                        <p><i class="fas fa-users"></i> <strong>Total Voters:</strong> {{ election.total_voters }}</p>
+                        <p><i class="fas fa-vote-yea"></i> <strong>Total Votes Cast:</strong> {{ election.total_votes_cast }}</p>
+                        {% if election.winner %}
+                            <p><i class="fas fa-crown"></i> <strong>Winner:</strong> {{ election.winner.name }}</p>
+                        {% else %}
+                            <p><i class="fas fa-hourglass"></i> <strong>Winner:</strong> Not yet determined</p>
+                        {% endif %}
+                        <div class="results-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Candidate Name</th>
+                                        <th>Votes Received</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in election.results %}
+                                        <tr>
+                                            <td>{{ result.candidate__name }}</td>
+                                            <td>{{ result.total_votes }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="2">No votes recorded.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-data">No past results available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- Add custom styles -->
+<style>
+.results-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #ffffff, #e9ecef);
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.results-header h1 {
+    color: #1a3c34;
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.results-header p {
+    color: #666;
+    font-size: 1.3rem;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 0.5rem;
+}
+
+.tab-button {
+    padding: 0.8rem 2rem;
+    border: none;
+    background: none;
+    color: #666;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.2s ease, border-bottom 0.3s ease;
+    position: relative;
+}
+
+.tab-button:hover {
+    color: #007bff;
+    transform: translateY(-2px);
+}
+
+.tab-button.active {
+    color: #007bff;
+    border-bottom: 3px solid #007bff;
+}
+
+.tab-button::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: #007bff;
+    transition: width 0.3s ease;
+}
+
+.tab-button:hover::after {
+    width: 100%;
+}
+
+.results-section {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.results-section.active {
+    display: block;
+    opacity: 1;
+}
+
+.results-section h2 {
+    color: #2c3e50;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.result-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.result-card h3 {
+    color: #2c3e50;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+}
+
+.result-card p {
+    color: #666;
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.result-card p i {
+    color: #007bff;
+}
+
+.results-table {
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+
+.results-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f8f9fa;
+}
+
+.results-table th, .results-table td {
+    padding: 0.8rem;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.results-table th {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+}
+
+.results-table tr:nth-child(even) {
+    background-color: #f1f1f1;
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    font-size: 1.2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .results-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .results-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .results-header p {
+        font-size: 1.1rem;
+    }
+
+    .tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .tab-button {
+        padding: 0.7rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .result-card {
+        padding: 1.2rem;
+    }
+
+    .results-table {
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<!-- Add custom JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tab-button');
+    const sections = document.querySelectorAll('.results-section');
+    let activeSection = 'new_results'; // Default section
+
+    // Show section and set active tab
+    function showResults(sectionId) {
+        // Hide all sections
+        sections.forEach(section => {
+            section.classList.remove('active');
+            section.style.display = 'none';
+        });
+
+        // Show the selected section
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+            setTimeout(() => targetSection.classList.add('active'), 10); // Delay for smooth transition
+        } else {
+            console.error('Section not found:', sectionId);
+        }
+
+        activeSection = sectionId;
+
+        // Update active tab
+        tabs.forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.getAttribute('data-section') === sectionId) {
+                tab.classList.add('active');
+            }
+        });
+    }
+
+    // Set default section on load
+    showResults(activeSection);
+
+    // Add explicit click event listeners for tabs
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            showResults(tab.getAttribute('data-section'));
+        });
+    });
+
+    // Add keyboard navigation
+    tabs.forEach(tab => {
+        tab.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                showResults(tab.getAttribute('data-section'));
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

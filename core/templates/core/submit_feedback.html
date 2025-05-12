@@ -1,0 +1,340 @@
+{% extends 'core/home.html' %}
+
+{% block title %}Submit Feedback{% endblock %}
+
+{% block content %}
+<div class="feedback-container">
+    <div class="feedback-header">
+        <h1>Submit Feedback <i class="fas fa-comment"></i></h1>
+        <p>Share your thoughts to improve our voting system! 📝</p>
+    </div>
+
+    <div class="feedback-card">
+        <form method="post" id="feedbackForm" novalidate>
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.role.id_for_label }}"><i class="fas fa-user-tag"></i> Role *</label>
+                {{ form.role }}
+                <span class="error-message" id="role-error"></span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}"><i class="fas fa-user"></i> Name *</label>
+                {{ form.name }}
+                <span class="error-message" id="name-error"></span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.message.id_for_label }}"><i class="fas fa-pen"></i> Message *</label>
+                {{ form.message }}
+                <span class="char-count" id="charCount">0 / 500 characters</span>
+                <span class="error-message" id="message-error"></span>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> <span class="btn-text">Submit</span>
+                    <span class="btn-loading" style="display: none;">Submitting...</span>
+                </button>
+                <div id="successMessage" class="success-message" style="display: none;">
+                    <i class="fas fa-check-circle"></i> Feedback submitted successfully!
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- Add custom styles -->
+<style>
+.feedback-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #ffffff, #e9ecef);
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.feedback-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.feedback-header h1 {
+    color: #1a3c34;
+    font-size: 2.8rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.feedback-header p {
+    color: #666;
+    font-size: 1.2rem;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.feedback-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #007bff;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.7rem;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    background: #f9f9f9;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+    transform: scale(1.02);
+}
+
+.form-control.invalid {
+    border-color: #dc3545;
+    animation: shake 0.3s ease-in-out;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.95rem;
+    margin-top: 0.3rem;
+    display: block;
+    min-height: 1.2rem;
+}
+
+.char-count {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    text-align: right;
+    margin-top: 0.3rem;
+}
+
+.form-actions {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 140px;
+}
+
+.btn-primary {
+    background-color: #28a745;
+    color: white;
+    box-shadow: 0 3px 8px rgba(40, 167, 69, 0.4);
+}
+
+.btn-primary:hover {
+    background-color: #218838;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.6);
+}
+
+.success-message {
+    color: #155724;
+    background-color: #d4edda;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.success-message i {
+    color: #28a745;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+@media (max-width: 768px) {
+    .feedback-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .feedback-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .feedback-header p {
+        font-size: 1.1rem;
+    }
+
+    .form-group label {
+        font-size: 1.1rem;
+    }
+
+    .form-control {
+        font-size: 1rem;
+        padding: 0.9rem 1.2rem;
+    }
+
+    .btn {
+        font-size: 1.1rem;
+        padding: 0.9rem 1.7rem;
+    }
+}
+</style>
+
+<!-- Add custom JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('feedbackForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const successMessage = document.getElementById('successMessage');
+    const fields = {
+        role: document.getElementById('id_role'),
+        name: document.getElementById('id_name'),
+        message: document.getElementById('id_message')
+    };
+    const errors = {
+        role: document.getElementById('role-error'),
+        name: document.getElementById('name-error'),
+        message: document.getElementById('message-error')
+    };
+    const charCount = document.getElementById('charCount');
+
+    // Real-time Validation
+    function validateField(field, value) {
+        let isValid = true;
+        let errorMsg = '';
+
+        switch (field) {
+            case 'role':
+                if (!value) {
+                    isValid = false;
+                    errorMsg = 'Please select a role.';
+                }
+                break;
+            case 'name':
+                if (!value.trim()) {
+                    isValid = false;
+                    errorMsg = 'Name is required.';
+                } else if (value.length > 100) {
+                    isValid = false;
+                    errorMsg = 'Name must be 100 characters or fewer.';
+                }
+                break;
+            case 'message':
+                if (!value.trim()) {
+                    isValid = false;
+                    errorMsg = 'Message is required.';
+                } else if (value.length > 500) {
+                    isValid = false;
+                    errorMsg = 'Message must be 500 characters or fewer.';
+                }
+                break;
+        }
+
+        errors[field].textContent = errorMsg;
+        fields[field].classList.toggle('invalid', !isValid);
+        return isValid;
+    }
+
+    // Validate all fields on input
+    Object.keys(fields).forEach(field => {
+        if (fields[field]) {
+            fields[field].addEventListener('input', () => {
+                validateField(field, fields[field].value);
+                if (field === 'message') {
+                    charCount.textContent = `${fields[field].value.length} / 500 characters`;
+                }
+            });
+        }
+    });
+
+    // Form Submission with Feedback
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        let isValid = true;
+
+        Object.keys(fields).forEach(field => {
+            if (fields[field] && !validateField(field, fields[field].value)) {
+                isValid = false;
+            }
+        });
+
+        if (isValid) {
+            submitBtn.disabled = true;
+            submitBtn.querySelector('.btn-text').style.display = 'none';
+            submitBtn.querySelector('.btn-loading').style.display = 'inline';
+            setTimeout(() => {
+                successMessage.style.display = 'flex';
+                submitBtn.disabled = false;
+                submitBtn.querySelector('.btn-text').style.display = 'inline';
+                submitBtn.querySelector('.btn-loading').style.display = 'none';
+                form.reset();
+                setTimeout(() => successMessage.style.display = 'none', 3000);
+            }, 1000); // Simulate server response
+        }
+    });
+});
+</script>
+
+{% endblock %}
+

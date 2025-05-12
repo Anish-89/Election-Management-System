@@ -1,0 +1,19 @@
+{% extends 'voter/voter_dashboard.html' %}
+
+{% block content %}
+<h2>Vote in {{ election.name }}</h2>
+
+{% if form.fields.candidate.disabled %}
+    <p>You have already voted in this election.</p>
+{% else %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit Vote</button>
+    </form>
+{% endif %}
+
+
+
+<a href="{% url 'voter_dashboard' %}">Back to Dashboard</a>
+{% endblock %}

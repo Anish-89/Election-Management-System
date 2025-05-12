@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #3a5a9b;
+            --secondary-color: #e63946;
+            --accent-color: #4cc9f0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: url('/api/placeholder/1920/1080') center center/cover fixed;
+            color: var(--dark-color);
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.85);
+            z-index: -1;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #1d3557);
+            color: white;
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            animation: fadeInDown 1s ease-out;
+            font-weight: 600;
+        }
+        
+        .header-center {
+            text-align: center;
+            animation: fadeInDown 1s ease-out;
+            font-weight: 500;
+            font-style: italic;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            animation: fadeInDown 1s ease-out;
+            font-weight: 600;
+        }
+        
+        .header-icon {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .main-container {
+            display: flex;
+            position: relative;
+            min-height: calc(100vh - 56px);
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50, #1a202c);
+            padding: 30px 0;
+            min-height: calc(100vh - 56px);
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+            z-index: 10;
+            position: relative;
+        }
+        
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        
+        .sidebar h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            padding: 0 20px;
+        }
+        
+        .sidebar.collapsed h2 {
+            display: none;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar li {
+            margin-bottom: 5px;
+            transition: var(--transition);
+        }
+        
+        .sidebar li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar a {
+            color: #e1e1e1;
+            text-decoration: none;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+        }
+        
+        .sidebar a:hover {
+            color: white;
+        }
+        
+        .sidebar a i {
+            margin-right: 15px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .sidebar.collapsed a span {
+            display: none;
+        }
+        
+        .sidebar.collapsed a i {
+            margin-right: 0;
+            font-size: 1.3rem;
+        }
+        
+        .toggle-sidebar {
+            position: absolute;
+            right: -16px;
+            top: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-sidebar:hover {
+            background-color: #304b7d;
+        }
+        
+        main {
+            flex: 1;
+            padding: 30px;
+            transition: var(--transition);
+            overflow-y: auto;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+        
+        .dashboard-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .metric {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .metric:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        .metric:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+        
+        .metric p {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .metric h3 {
+            font-size: 2.5rem;
+            color: var(--dark-color);
+            margin-top: 5px;
+            font-weight: 700;
+        }
+        
+        .metric i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            opacity: 0.8;
+        }
+        
+        .upcoming-elections {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .upcoming-elections h2 {
+            background: linear-gradient(90deg, var(--primary-color), #304b7d);
+            color: white;
+            padding: 20px;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .election-list {
+            padding: 0;
+        }
+        
+        .election-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+        
+        .election-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .election-item:last-child {
+            border-bottom: none;
+        }
+        
+        .election-info h3 {
+            margin: 0 0 5px 0;
+            color: var(--dark-color);
+            font-size: 1.2rem;
+        }
+        
+        .election-date {
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+        
+        .election-date i {
+            margin-right: 5px;
+            color: var(--secondary-color);
+        }
+        
+        .vote-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+        
+        .vote-button i {
+            margin-right: 8px;
+        }
+        
+        .vote-button:hover {
+            background-color: #304b7d;
+            transform: translateY(-2px);
+        }
+        
+        .activity-feed {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            padding: 0;
+            overflow: hidden;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .activity-feed h2 {
+            background: linear-gradient(90deg, var(--primary-color), #304b7d);
+            color: white;
+            padding: 20px;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .activity-list {
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e8f4ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .activity-icon i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-content p {
+            margin: 0;
+            color: var(--dark-color);
+        }
+        
+        .activity-time {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.4s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification i {
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+        
+        .notification.success i {
+            color: #4caf50;
+        }
+        
+        .notification.info i {
+            color: var(--accent-color);
+        }
+        
+        .notification-content h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+        
+        .notification-content p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        /* Animation keyframes */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar h2 {
+                display: none;
+            }
+            
+            .sidebar a span {
+                display: none;
+            }
+            
+            .sidebar a i {
+                margin-right: 0;
+                font-size: 1.3rem;
+            }
+            
+            main {
+                padding: 20px;
+            }
+            
+            .header-center {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-metrics {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                height: 100vh;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            main {
+                padding: 70px 15px 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body class="{% block page_class %}voter_dashboard{% endblock %}">
+    <div class="header">
+        <div class="header-left">
+            <i class="fas fa-poll-h header-icon"></i>
+            <span>eVote Platform</span>
+        </div>
+        
+        <div class="header-center">
+            "Your vote is your voice, your choice, and your future."
+        </div>
+        
+        <div class="header-right">
+            <i class="fas fa-user-circle header-icon"></i>
+            <span>Voter</span>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <div class="sidebar" id="sidebar">
+            <button class="toggle-sidebar" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2>Voter Dashboard</h2>
+            <ul>
+                <li>
+                    <a href="{% url 'voter_dashboard' %}">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'voter_profile' voter.id %}">
+                        <i class="fas fa-user"></i>
+                        <span>View Profile</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'update_voter_profile' voter.id %}">
+                        <i class="fas fa-user-edit"></i>
+                        <span>Update Profile</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'update_voter_credentials' voter.id %}">
+                        <i class="fas fa-key"></i>
+                        <span>Update Credentials</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'eligible_elections' voter.id %}">
+                        <i class="fas fa-vote-yea"></i>
+                        <span>View Elections</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'view_results' %}">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>View Results</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'voter_audit_logs' %}">
+                        <i class="fas fa-history"></i>
+                        <span>Audit Logs</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <main>
+            {% block content %}
+            <div class="container">
+                <h1>Welcome {{ user.first_name }}!</h1>
+                
+                <div class="dashboard-metrics">
+                    <div class="metric">
+                        <i class="fas fa-ballot"></i>
+                        <p>Total Elections</p>
+                        <h3>{{ total_elections }}</h3>
+                    </div>
+                    <div class="metric">
+                        <i class="fas fa-calendar-alt"></i>
+                        <p>Upcoming Elections</p>
+                        <h3>{{ upcoming_elections.count }}</h3>
+                    </div>
+                    <div class="metric">
+                        <i class="fas fa-check-square"></i>
+                        <p>Votes Cast</p>
+                        <h3>{{ votes_cast }}</h3>
+                    </div>
+                </div>
+                
+        
+                
+                        
+                    
+            </div>
+            {% endblock %}
+        </main>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-info-circle"></i>
+        <div class="notification-content">
+            <h3>Welcome Back!</h3>
+            <p>You have upcoming elections to vote in.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Toggle sidebar functionality
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const sidebar = document.getElementById('sidebar');
+        
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+        
+        // Mobile sidebar toggle
+        if (window.innerWidth <= 768) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+        }
+        
+        // Notification system
+        const notification = document.getElementById('notification');
+        
+        // Show welcome notification after a delay
+        setTimeout(() => {
+            notification.classList.add('show', 'info');
+            
+            // Hide notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }, 1000);
+        
+        // Function to show notifications
+        function showNotification(title, message, type = 'info') {
+            const notif = document.getElementById('notification');
+            const notifTitle = notif.querySelector('h3');
+            const notifMessage = notif.querySelector('p');
+            const notifIcon = notif.querySelector('i');
+            
+            notifTitle.textContent = title;
+            notifMessage.textContent = message;
+            
+            // Reset classes and add new ones
+            notif.className = 'notification';
+            notif.classList.add('show', type);
+            
+            if (type === 'success') {
+                notifIcon.className = 'fas fa-check-circle';
+            } else if (type === 'info') {
+                notifIcon.className = 'fas fa-info-circle';
+            } else if (type === 'warning') {
+                notifIcon.className = 'fas fa-exclamation-triangle';
+            }
+            
+            // Hide notification after 5 seconds
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Add animation to metrics on scroll
+        const metrics = document.querySelectorAll('.metric');
+        const animateOnScroll = () => {
+            metrics.forEach(metric => {
+                const metricPosition = metric.getBoundingClientRect().top;
+                const screenPosition = window.innerHeight / 1.3;
+                
+                if (metricPosition < screenPosition) {
+                    metric.style.animation = 'fadeIn 0.5s forwards';
+                }
+            });
+        };
+        
+        window.addEventListener('scroll', animateOnScroll);
+        // Trigger once on load
+        setTimeout(animateOnScroll, 300);
+        
+        // Interactive metrics with hover effects
+        metrics.forEach(metric => {
+            metric.addEventListener('mouseover', () => {
+                metric.style.backgroundColor = '#f8f9fa';
+            });
+            
+            metric.addEventListener('mouseout', () => {
+                metric.style.backgroundColor = 'white';
+            });
+            
+            metric.addEventListener('click', () => {
+                // Example of interactive response to clicking on metrics
+                const metricType = metric.querySelector('p').textContent.trim();
+                if (metricType === 'Upcoming Elections') {
+                    const upcoming = metric.querySelector('h3').textContent;
+                    if (parseInt(upcoming) > 0) {
+                        showNotification('Upcoming Elections', `You have ${upcoming} election(s) where you can cast your vote.`, 'info');
+                    } else {
+                        showNotification('Upcoming Elections', 'There are no upcoming elections at this time.', 'info');
+                    }
+                } else if (metricType === 'Votes Cast') {
+                    showNotification('Voting History', 'Click on "View Results" to see the outcomes of past elections.', 'info');
+                } else if (metricType === 'Total Elections') {
+                    showNotification('Elections', 'View all elections by clicking on "View Elections" in the sidebar.', 'info');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

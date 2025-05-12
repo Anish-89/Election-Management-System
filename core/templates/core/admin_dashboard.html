@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.css">
+    <link rel="stylesheet" href="{% static 'core/styles.css' %}">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #475569;
+            --accent: #f59e0b;
+            --accent-dark: #d97706;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --transition-speed: 0.3s;
+            --border-radius: 10px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            transition: all var(--transition-speed) ease;
+            overflow-x: hidden;
+        }
+
+        /* Header styling */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px 0 calc(var(--sidebar-width) + 30px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .header-collapsed {
+            padding-left: 30px;
+        }
+
+        .header-quote {
+            font-style: italic;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .user-info span {
+            display: block;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Main container */
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+            padding-top: var(--header-height);
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            height: calc(100vh - var(--header-height));
+            width: var(--sidebar-width);
+            background-color: white;
+            padding: 25px 0;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.05);
+            transition: all var(--transition-speed) ease;
+            z-index: 99;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar-collapsed {
+            left: calc(-1 * var(--sidebar-width) + 60px);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-title {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-sidebar {
+            border: none;
+            background: none;
+            color: var(--secondary);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .toggle-sidebar:hover {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .menu-item {
+            margin-bottom: 5px;
+        }
+
+        .menu-link {
+            display: flex;
+            text-decoration: none;
+            padding: 12px 25px;
+            color: var(--secondary);
+            align-items: center;
+            gap: 12px;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            color: var(--primary);
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+
+        .menu-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--primary);
+        }
+
+        .menu-icon {
+            font-size: 1.2rem;
+            min-width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-text {
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-collapsed .menu-text {
+            display: none;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            margin-left: var(--sidebar-width);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .main-content-expanded {
+            margin-left: 60px;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .welcome-message {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .date-info {
+            color: var(--secondary);
+            font-size: 1rem;
+        }
+
+        /* Dashboard metrics */
+        .dashboard-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-title {
+            color: var(--secondary);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .metric-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: white;
+        }
+
+        .icon-primary {
+            background-color: var(--primary);
+        }
+
+        .icon-success {
+            background-color: var(--success);
+        }
+
+        .icon-warning {
+            background-color: var(--warning);
+        }
+
+        .icon-info {
+            background-color: var(--info);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .metric-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+        }
+
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-down {
+            color: var(--danger);
+        }
+
+        /* Widgets */
+        .widgets-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .widget {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .widget-title {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .widget-action {
+            border: none;
+            background: none;
+            color: var(--secondary);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .widget-action:hover {
+            color: var(--primary);
+        }
+
+        /* Recent elections widget */
+        .recent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .item-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .item-subtitle {
+            font-size: 0.85rem;
+            color: var(--secondary);
+        }
+
+        .item-action {
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        /* Quick actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: #f8fafc;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            text-align: left;
+        }
+
+        .action-button:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .action-button:hover .action-icon {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .action-icon {
+            min-width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.05);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .action-text {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        /* Activity log */
+        .activity-log {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 15px;
+            padding-bottom: 15px;
+            position: relative;
+        }
+
+        .activity-item:not(:last-child):before {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 12px;
+            bottom: 0;
+            width: 2px;
+            background-color: #e2e8f0;
+        }
+
+        .activity-indicator {
+            min-width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        /* Responsive styles */
+        @media screen and (max-width: 1024px) {
+            .widgets-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            :root {
+                --sidebar-width: 260px;
+            }
+            
+            .header {
+                padding: 0 20px;
+            }
+            
+            .sidebar {
+                left: -280px;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .sidebar-collapsed {
+                left: 0;
+            }
+
+            .sidebar-toggle-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 98;
+                display: none;
+            }
+            
+            .overlay-active {
+                display: block;
+            }
+
+            .menu-hamburger {
+                display: block;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.5rem;
+                cursor: pointer;
+            }
+
+            .widgets-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="{% block page_class %}admin_dashboard{% endblock %}">
+    <!-- Header -->
+    <div class="header" id="header">
+        <div class="header-quote">
+            "Leadership is not about being in charge. It is about taking care of those in your charge." — Simon Sinek
+        </div>
+        <div class="user-profile">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+                <span class="user-name">Admin</span>
+                <span class="user-role">System Administrator</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sidebar toggle overlay -->
+    <div class="sidebar-toggle-overlay" id="sidebar-overlay"></div>
+
+    <!-- Main container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <i class="fas fa-vote-yea"></i>
+                    <span>Election Admin</span>
+                </div>
+                <button class="toggle-sidebar" id="toggle-sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="{% url 'admin_dashboard' %}" class="menu-link active">
+                        <span class="menu-icon"><i class="fas fa-tachometer-alt"></i></span>
+                        <span class="menu-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{% url 'list_elections' %}" class="menu-link">
+                        <span class="menu-icon"><i class="fas fa-poll"></i></span>
+                        <span class="menu-text">Manage Elections</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{% url 'candidate_list' %}" class="menu-link">
+                        <span class="menu-icon"><i class="fas fa-user-tie"></i></span>
+                        <span class="menu-text">Candidate Management</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{% url 'voter_list' %}" class="menu-link">
+                        <span class="menu-icon"><i class="fas fa-users"></i></span>
+                        <span class="menu-text">Voter Management</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{% url 'calculate_all_results' %}" class="menu-link">
+                        <span class="menu-icon"><i class="fas fa-calculator"></i></span>
+                        <span class="menu-text">Calculate Results</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{% url 'view_results' %}" class="menu-link">
+                        <span class="menu-icon"><i class="fas fa-chart-pie"></i></span>
+                        <span class="menu-text">View Results</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{% url 'report_list' %}" class="menu-link">
+                        <span class="menu-icon"><i class="fas fa-file-alt"></i></span>
+                        <span class="menu-text">View Reports</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{% url 'view_feedback' %}" class="menu-link">
+                        <span class="menu-icon"><i class="fas fa-comments"></i></span>
+                        <span class="menu-text">View Feedback</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{% url 'audit_logs' %}" class="menu-link">
+                        <span class="menu-icon"><i class="fas fa-history"></i></span>
+                        <span class="menu-text">Audit Logs</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{% url 'logout' %}" class="menu-link">
+                        <span class="menu-icon"><i class="fas fa-sign-out-alt"></i></span>
+                        <span class="menu-text">Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content" id="main-content">
+            {% block content %}
+            <div class="page-header">
+                <h1 class="welcome-message">Welcome, Admin!</h1>
+                <p class="date-info" id="current-date">Loading date...</p>
+            </div>
+
+            <!-- Dashboard metrics -->
+            <div class="dashboard-metrics">
+                <div class="metric-card animate__animated animate__fadeInUp">
+                    <div class="metric-header">
+                        <div class="metric-title">Total Elections</div>
+                        <div class="metric-icon icon-primary">
+                            <i class="fas fa-vote-yea"></i>
+                        </div>
+                    </div>
+                    <div class="metric-value">{{ total_elections }}</div>
+                    <div class="metric-trend trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        
+                    </div>
+                </div>
+
+                <div class="metric-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+                    <div class="metric-header">
+                        <div class="metric-title">Total Voters</div>
+                        <div class="metric-icon icon-success">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="metric-value">{{ total_voters }}</div>
+                    <div class="metric-trend trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        
+                    </div>
+                </div>
+
+                <div class="metric-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                    <div class="metric-header">
+                        <div class="metric-title">Total Candidates</div>
+                        <div class="metric-icon icon-warning">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                    </div>
+                    <div class="metric-value">{{ total_candidates }}</div>
+                    <div class="metric-trend trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        
+                    </div>
+                </div>
+
+                
+
+           
+            {% endblock %}
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show current date in header
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
+
+            // Toggle sidebar
+        
+        
+            const toggleSidebar = document.getElementById('toggle-sidebar');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const header = document.getElementById('header');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            toggleSidebar.addEventListener('click', function() {
+                sidebar.classList.toggle('sidebar-collapsed');
+                mainContent.classList.toggle('main-content-expanded');
+                header.classList.toggle('header-collapsed');
+                overlay.classList.toggle('overlay-active');
+            });
+            
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('sidebar-collapsed');
+                mainContent.classList.remove('main-content-expanded');
+                header.classList.remove('header-collapsed');
+                overlay.classList.remove('overlay-active');
+            });
+            
+          
+            // Add animations to metrics cards
+            const metricCards = document.querySelectorAll('.metric-card');
+            metricCards.forEach((card, index) => {
+                card.style.animationDelay = (index * 0.1) + 's';
+            });
+            
+            // Counter animation for metric values
+            function animateValue(element, start, end, duration) {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const value = Math.floor(progress * (end - start) + start);
+                    element.textContent = value.toLocaleString();
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+            
+            // Apply counter animation to metric values
+            const metricValues = document.querySelectorAll('.metric-value');
+            metricValues.forEach((value) => {
+                const targetValue = parseInt(value.textContent.replace(/,/g, ''), 10);
+                value.textContent = '0';
+                animateValue(value, 0, targetValue, 1500);
+            });
+            
+            // Widget hover effects
+            const widgets = document.querySelectorAll('.widget');
+            widgets.forEach((widget) => {
+                widget.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)';
+                    this.style.transition = 'all 0.3s ease';
+                });
+                
+                widget.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'var(--box-shadow)';
+                });
+            });
+            
+            // Action buttons effects
+            const actionButtons = document.querySelectorAll('.action-button');
+            actionButtons.forEach((button) => {
+                button.addEventListener('click', function() {
+                    const buttonText = this.querySelector('.action-text').textContent;
+                    // Here you would typically redirect or trigger an action
+                    console.log(`Action clicked: ${buttonText}`);
+                    
+                    // Create a ripple effect
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    this.appendChild(ripple);
+                    
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    ripple.style.width = ripple.style.height = `${size}px`;
+                    ripple.style.left = `${event.clientX - rect.left - size/2}px`;
+                    ripple.style.top = `${event.clientY - rect.top - size/2}px`;
+                    
+                    ripple.classList.add('active');
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 500);
+                });
+            });
+            
+            // Add ripple effect style
+            const style = document.createElement('style');
+            style.textContent = `
+                .ripple {
+                    position: absolute;
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.5s linear;
+                    pointer-events: none;
+                }
+                
+                @keyframes ripple {
+                    to {
+                        transform: scale(2.5);
+                        opacity: 0;
+                    }
+                }
+                
+                .action-button {
+                    overflow: hidden;
+                    position: relative;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            
+        });
+    </script>
+</body>
+</html>

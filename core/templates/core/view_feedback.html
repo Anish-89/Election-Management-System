@@ -1,0 +1,149 @@
+{% extends 'core/admin_dashboard.html' %}
+
+{% block title %}View Feedback{% endblock %}
+
+{% block content %}
+<style>
+    /* Page Styling */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+    h2 {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 26px;
+        margin-bottom: 15px;
+    }
+
+    /* Feedback Container */
+    .feedback-container {
+        width: 90%;
+        max-width: 900px;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        margin: 20px auto;
+    }
+
+    /* Table Styling */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    th {
+        background: #27ae60;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    tr:hover {
+        background: #f1f1f1;
+    }
+    
+    /* Search Box */
+    .search-container {
+        text-align: right;
+        margin-bottom: 10px;
+    }
+    .search-input {
+        width: 250px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        font-size: 16px;
+        color: #888;
+    }
+
+    /* Hover Effects */
+    th:hover {
+        background-color: #2ecc71;
+        transition: 0.3s;
+    }
+</style>
+
+<div class="feedback-container">
+    <h2>📢 User Feedback</h2>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="searchFeedback" class="search-input" placeholder="🔍 Search feedback...">
+    </div>
+
+    <!-- Feedback Table -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Role ⬍</th>
+                <th onclick="sortTable(1)">Name ⬍</th>
+                <th>Message</th>
+                <th onclick="sortTable(3)">Submitted At ⬍</th>
+            </tr>
+        </thead>
+        <tbody id="feedbackTable">
+            {% for feedback in feedbacks %}
+            <tr>
+                <td>{{ feedback.role }}</td>
+                <td>{{ feedback.name }}</td>
+                <td>{{ feedback.message }}</td>
+                <td>{{ feedback.submitted_at }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="empty-state">No feedback submitted yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Search Functionality
+    document.getElementById("searchFeedback").addEventListener("keyup", function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll("#feedbackTable tr");
+
+        rows.forEach(row => {
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? "" : "none";
+        });
+    });
+
+    // Table Sorting Functionality
+    function sortTable(columnIndex) {
+        let table = document.getElementById("feedbackTable");
+        let rows = Array.from(table.rows);
+        let isAscending = table.getAttribute("data-sort") === "asc";
+        table.setAttribute("data-sort", isAscending ? "desc" : "asc");
+
+        rows.sort((rowA, rowB) => {
+            let cellA = rowA.cells[columnIndex].textContent.trim().toLowerCase();
+            let cellB = rowB.cells[columnIndex].textContent.trim().toLowerCase();
+
+            return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+        });
+
+        rows.forEach(row => table.appendChild(row));
+    }
+</script>
+
+{% endblock %}

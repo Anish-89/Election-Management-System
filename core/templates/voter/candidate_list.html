@@ -1,0 +1,21 @@
+{% extends "voter/voter_dashboard.html" %}
+
+{% block content %}
+<h2>List of Candidates</h2>
+
+{% if candidates %}
+    <ul>
+        {% for candidate in candidates %}
+            <li>
+                <a href="{% url 'candidate_detail' candidate.id %}">
+                    {{ candidate.name }} - {{ candidate.political_party }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No candidates available for this election.</p>
+{% endif %}
+
+<a href="{% url 'voter_dashboard' %}">Back to Dashboard</a>
+{% endblock %}

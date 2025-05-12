@@ -1,0 +1,154 @@
+{% extends 'core/admin_dashboard.html' %}
+
+{% block content %}
+<style>
+    /* General Page Styling */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+    h2 {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 26px;
+        margin-bottom: 15px;
+    }
+
+    /* Form Section */
+    .report-container {
+        width: 90%;
+        max-width: 800px;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        margin: 20px auto;
+    }
+    label {
+        font-weight: bold;
+        display: block;
+        margin-top: 10px;
+        color: #34495e;
+    }
+    select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px;
+    }
+    .generate-btn {
+        width: 100%;
+        background-color: #27ae60;
+        color: white;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: 0.3s;
+    }
+    .generate-btn:hover {
+        background-color: #2ecc71;
+        transform: scale(1.03);
+    }
+
+    /* Report List Styling */
+    .report-list {
+        margin-top: 20px;
+    }
+    .report-item {
+        background: white;
+        padding: 15px;
+        border-radius: 6px;
+        box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+        transition: 0.3s;
+    }
+    .report-item:hover {
+        transform: scale(1.02);
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .report-item b {
+        color: #2980b9;
+        font-size: 18px;
+    }
+    .report-item a {
+        text-decoration: none;
+        font-weight: bold;
+        color: #e74c3c;
+        margin-right: 10px;
+    }
+    .report-item a:hover {
+        text-decoration: underline;
+        color: #c0392b;
+    }
+</style>
+
+<div class="report-container">
+    <h2>Generate Report</h2>
+    <form method="POST" action="{% url 'generate_report' %}">
+        {% csrf_token %}
+        
+        <label for="election_id">Select Completed Election:</label>
+        <select name="election_id" id="electionSelect" required>
+            <option value="" disabled selected>-- Select Election --</option>
+            {% for election in completed_elections %}
+                <option value="{{ election.id }}">{{ election.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="report_type">Select Report Type:</label>
+        <select name="report_type" id="reportTypeSelect" required>
+            <option value="Election Report">Election Report</option>
+            <option value="Voter Turnout">Voter Turnout</option>
+            <option value="Election Activity">Election Activity</option>
+        </select>
+
+        <button type="submit" class="generate-btn">Generate Report</button>
+    </form>
+</div>
+
+<!-- Display Generated Reports -->
+<div class="report-container report-list">
+    <h3>Generated Reports</h3>
+    {% if reports %}
+        {% for report in reports %}
+            <div class="report-item">
+                <b>{{ report.name }}</b> ({{ report.report_type }}, {{ report.generated_at }}) <br>
+                <a href="{% url 'download_report' report.id %}">Download PDF</a>
+                <a href="/media/reports/{{ report.name }}_candidates.xlsx">Download Candidates Excel</a>
+                <a href="/media/reports/{{ report.name }}_voters.xlsx">Download Voters Excel</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No reports available.</p>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Add interactivity - change button color when dropdown is selected
+        document.getElementById("electionSelect").addEventListener("change", function () {
+            document.querySelector(".generate-btn").style.backgroundColor = "#2ecc71";
+        });
+
+        // Smooth hover effects
+        document.querySelectorAll(".report-item a").forEach(link => {
+            link.addEventListener("mouseover", function () {
+                this.style.color = "#c0392b";
+            });
+            link.addEventListener("mouseleave", function () {
+                this.style.color = "#e74c3c";
+            });
+        });
+    });
+</script>
+
+{% endblock %}

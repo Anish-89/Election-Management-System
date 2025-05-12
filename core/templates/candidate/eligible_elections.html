@@ -1,0 +1,340 @@
+<!-- eligible_election.html -->
+{% extends 'core/candidate_dashboard.html' %}
+
+{% block content %}
+<div class="elections-container">
+    <div class="elections-header">
+        <h1>Eligible Elections</h1>
+        <p>Explore and participate in elections based on their status</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+        <button class="tab-btn active" onclick="showSection('upcoming')">Upcoming</button>
+        <button class="tab-btn" onclick="showSection('ongoing')">Ongoing</button>
+        <button class="tab-btn" onclick="showSection('completed')">Completed</button>
+    </div>
+
+    <!-- Search Input -->
+    <div class="search-container">
+        <input type="text" id="election-search" class="search-input" placeholder="Search elections...">
+    </div>
+
+    <!-- Upcoming Elections (Nomination Allowed) -->
+    <div id="upcoming" class="election-section">
+        <h2>Upcoming Elections</h2>
+        {% if upcoming_elections %}
+            <div class="election-list" id="upcoming-list">
+                {% for election in upcoming_elections %}
+                    <div class="election-card">
+                        <h3>{{ election.name }}</h3>
+                        <div class="election-details">
+                            <p><strong>Type:</strong> {{ election.election_type }}</p>
+                            <p><strong>Start Date:</strong> {{ election.start_date }}</p>
+                            <p><strong>End Date:</strong> {{ election.end_date }}</p>
+                            <p><strong>Region:</strong> {{ election.region }}</p>
+                        </div>
+                        <a href="{% url 'submit_nomination' election.id %}" class="btn btn-primary">Submit Nomination</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-data">No upcoming elections available.</p>
+        {% endif %}
+    </div>
+
+    <!-- Ongoing Elections -->
+    <div id="ongoing" class="election-section" style="display: none;">
+        <h2>Ongoing Elections</h2>
+        {% if ongoing_elections %}
+            <div class="election-list" id="ongoing-list">
+                {% for election in ongoing_elections %}
+                    <div class="election-card">
+                        <h3>{{ election.name }}</h3>
+                        <div class="election-details">
+                            <p><strong>Type:</strong> {{ election.election_type }}</p>
+                            <p><strong>Start Date:</strong> {{ election.start_date }}</p>
+                            <p><strong>End Date:</strong> {{ election.end_date }}</p>
+                            <p><strong>Region:</strong> {{ election.region }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-data">No ongoing elections available.</p>
+        {% endif %}
+    </div>
+
+    <!-- Completed Elections -->
+    <div id="completed" class="election-section" style="display: none;">
+        <h2>Completed Elections</h2>
+        {% if completed_elections %}
+            <div class="election-list" id="completed-list">
+                {% for election in completed_elections %}
+                    <div class="election-card">
+                        <h3>{{ election.name }}</h3>
+                        <div class="election-details">
+                            <p><strong>Type:</strong> {{ election.election_type }}</p>
+                            <p><strong>Start Date:</strong> {{ election.start_date }}</p>
+                            <p><strong>End Date:</strong> {{ election.end_date }}</p>
+                            <p><strong>Region:</strong> {{ election.region }}</p>
+                        </div>
+                        <a href="{% url 'view_results' %}" class="btn btn-secondary">View Results</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-data">No completed elections available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add custom styles -->
+<style>
+.elections-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.elections-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.elections-header h1 {
+    color: #1a3c34;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.elections-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.tab-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #007bff;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px 6px 0 0;
+    background: #f1f1f1;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tab-btn.active {
+    background: #007bff;
+    color: white;
+}
+
+.tab-btn:hover:not(.active) {
+    background: #e9ecef;
+}
+
+.search-container {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.election-section {
+    display: none;
+}
+
+.election-section.active {
+    display: block;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.election-list {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.election-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.election-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.election-card h3 {
+    color: #1a3c34;
+    margin-bottom: 0.75rem;
+    font-size: 1.3rem;
+}
+
+.election-details p {
+    margin: 0.25rem 0;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    margin-top: 0.5rem;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .tab-navigation {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .tab-btn {
+        width: 100%;
+        border-radius: 6px;
+    }
+}
+</style>
+
+<!-- Add custom JavaScript -->
+<script>
+// Function to show the selected section
+function showSection(section) {
+    // Hide all sections and remove active class from tabs
+    const sections = document.querySelectorAll('.election-section');
+    const tabs = document.querySelectorAll('.tab-btn');
+    
+    sections.forEach(sec => {
+        sec.classList.remove('active');
+        sec.style.display = 'none';
+    });
+    
+    tabs.forEach(tab => tab.classList.remove('active'));
+
+    // Show the selected section and mark the tab as active
+    const targetSection = document.getElementById(section);
+    targetSection.classList.add('active');
+    targetSection.style.display = 'block';
+    
+    document.querySelector(`.tab-btn[onclick="showSection('${section}')"]`).classList.add('active');
+
+    // Reset search input and show all cards
+    const searchInput = document.getElementById('election-search');
+    searchInput.value = '';
+    const cards = targetSection.querySelectorAll('.election-card');
+    cards.forEach(card => card.style.display = 'block');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Ensure the "Upcoming" tab is active on page load
+    showSection('upcoming');
+
+    // Search functionality
+    const searchInput = document.getElementById('election-search');
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const activeSection = document.querySelector('.election-section.active');
+        const cards = activeSection.querySelectorAll('.election-card');
+
+        cards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            card.style.display = text.includes(query) ? 'block' : 'none';
+        });
+
+        // Adjust grid layout if some cards are hidden
+        const visibleCards = Array.from(cards).filter(card => card.style.display !== 'none');
+        const grid = activeSection.querySelector('.election-list');
+        if (grid) {
+            if (visibleCards.length === 1) {
+                grid.style.gridTemplateColumns = '1fr';
+            } else {
+                grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+            }
+        }
+    });
+
+    // Add click animation for buttons
+    document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            this.style.opacity = '0.7';
+            setTimeout(() => {
+                this.style.opacity = '1';
+                window.location.href = this.getAttribute('href');
+            }, 200);
+        });
+    });
+
+    // Debug: Log tab clicks
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            console.log(`Clicked tab: ${btn.textContent}`);
+        });
+    });
+});
+</script>
+{% endblock %}

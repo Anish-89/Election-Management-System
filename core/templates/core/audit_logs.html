@@ -1,0 +1,249 @@
+{% extends 'core/admin_dashboard.html' %}
+
+{% block content %}
+<style>
+    /* Table Styling */
+.audit-table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.audit-table thead {
+    background-color: #343a40;
+    color: white;
+}
+.audit-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+.success-log {
+    background-color: #d4edda !important;
+    color: #155724 !important;
+}
+.failure-log {
+    background-color: #f8d7da !important;
+    color: #721c24 !important;
+}
+
+/* Log Headers */
+.log-header {
+    margin-top: 30px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+}
+
+/* Search Bar */
+#searchInput {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 2px solid #007bff;
+    transition: 0.3s;
+}
+#searchInput:focus {
+    border-color: #0056b3;
+    box-shadow: 0px 0px 10px rgba(0, 91, 187, 0.5);
+}
+
+/* Accordion */
+.accordion-button {
+    font-weight: bold;
+}
+/* Extend table width */
+.table-responsive {
+    width: 100%;
+}
+
+/* Improve the "View Details" button */
+.view-details {
+    background-color: #ff9800 !important; /* Orange */
+    color: white !important;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.view-details:hover {
+    background-color: #e68900 !important;
+}
+
+/* Improve the log header to match table width */
+.log-header {
+    width: 100%;
+    text-align: center;
+    font-size: 22px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+}
+
+/* Table improvements */
+.audit-table {
+    width: 100%;
+    text-align: left;
+}
+
+</style>
+<div class="container mt-4">
+    <h1 class="text-center">Audit Logs</h1>
+
+    <!-- Search Bar -->
+    <div class="input-group mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search logs...">
+        <span class="input-group-text"><i class="fas fa-search"></i></span>
+    </div>
+
+    <!-- Admin Logs -->
+    <h2 class="log-header">Admin Logs</h2>
+    <div class="table-responsive">
+        <table class="table table-hover table-striped audit-table">
+            <thead class="table-dark">
+                <tr>
+                    <th>Admin User</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in admin_logs %}
+                <tr class="{% if 'Success' in log.details %}success-log{% else %}failure-log{% endif %}">
+                    <td>{{ log.admin_user.username }}</td>
+                    <td>{{ log.action }}</td>
+                    <td class="details-column">
+                        <span class="details-text">{{ log.details }}</span>
+                    </td>
+                    <td>{{ log.timestamp }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No admin logs available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            
+        </table>
+    </div>
+
+    <!-- Candidate Logs -->
+    <!-- Candidate Logs -->
+<h2 class="log-header">Candidate Logs</h2>
+<div class="accordion" id="candidateLogs">
+    {% if candidate_logs_grouped %}
+        {% for candidate, logs in candidate_logs_grouped.items %}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#candidate-{{ candidate.id }}">
+                        {{ candidate.user.username }}
+                    </button>
+                </h2>
+                <div id="candidate-{{ candidate.id }}" class="accordion-collapse collapse">
+                    <div class="table-responsive">
+                        <table class="table table-hover audit-table">
+                            <thead>
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in logs %}
+                                <tr class="{% if 'Success' in log.details %}success-log{% else %}failure-log{% endif %}">
+                                    <td>{{ log.action }}</td>
+                                    <td class="details-column">
+                                        <span class="details-text">{{ log.details }}</span>
+                                    </td>
+                                    <td>{{ log.timestamp }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No candidate logs available.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-center">No candidate logs available.</p>
+    {% endif %}
+</div>
+
+
+    <!-- Voter Logs -->
+    <!-- Voter Logs -->
+<h2 class="log-header">Voter Logs</h2>
+<div class="accordion" id="voterLogs">
+    {% if voter_logs_grouped %}
+        {% for voter, logs in voter_logs_grouped.items %}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#voter-{{ voter.id }}">
+                        {{ voter.user.username }}
+                    </button>
+                </h2>
+                <div id="voter-{{ voter.id }}" class="accordion-collapse collapse">
+                    <div class="table-responsive">
+                        <table class="table table-hover audit-table">
+                            <thead>
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in logs %}
+                                <tr class="{% if 'Success' in log.details %}success-log{% else %}failure-log{% endif %}">
+                                    <td>{{ log.action }}</td>
+                                    <td class="details-column">
+                                        <span class="details-text">{{ log.details }}</span>
+                                    </td>
+                                    <td>{{ log.timestamp }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No voter logs available.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-center">No voter logs available.</p>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const tableRows = document.querySelectorAll(".audit-table tbody tr");
+
+    // Search Logs
+    searchInput.addEventListener("keyup", function () {
+        let filter = searchInput.value.toLowerCase();
+        tableRows.forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+        });
+    });
+
+    // View Details Alert
+    document.querySelectorAll(".view-details").forEach(button => {
+        button.addEventListener("click", function () {
+            alert("Details: " + this.dataset.details);
+        });
+    });
+});
+
+</script>
+{% endblock %}

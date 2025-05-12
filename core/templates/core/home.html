@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Management System</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{% static 'core/scripts.js' %}" defer></script>
+</head>
+
+<body class="{% block page_class %}home{% endblock %}">
+    <!-- Header & Navigation -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo-container">
+                <img src="{% static 'core/logo1.jpg' %}" alt="EMS Logo" class="logo">
+                <h1>Election Management System</h1>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'about' %}">About</a></li>
+                    <li><a href="{% url 'contact' %}">Contact Us</a></li>
+                    <li><a href="{% url 'submit_feedback' %}">Submit Feedback</a></li>
+                </ul>
+                <div class="auth-modal">
+                    <button id="login-btn" class="btn-login">Login</button>
+                    <button id="register-btn" class="btn-register">Register</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}
+        <!-- Hero Section / Banner -->
+        <section class="hero-section">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h2>Empowering Elections with Transparency & Security</h2>
+                <p>A reliable, secure, and transparent platform for conducting democratic elections</p>
+                <div class="cta-buttons">
+                    <button class="cta-btn" id="how-it-works">How System Works</button>
+                    <button class="cta-btn" id="candidate-info">Learn How to Participate as Candidate</button>
+                    <button class="cta-btn" id="voter-info">Learn How to Vote</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login and Register Options (Hidden initially) -->
+        <div id="login-options" class="auth-options hidden">
+            <div class="auth-header">
+                <h3>Login Options</h3>
+                <button id="close-login-options" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <button id="admin-login-option" class="btn-login-option">Admin Login</button>
+            <button id="candidate-login-option" class="btn-login-option">Candidate Login</button>
+            <button id="voter-login-option" class="btn-login-option">Voter Login</button>
+        </div>
+
+        <!-- Login Form (Hidden initially) -->
+        <form id="login-form" class="auth-form hidden" method="post">
+            {% csrf_token %}
+            <div class="auth-header">
+                <h3 id="login-form-title">Login</h3>
+                <button type="button" id="cancel-login" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+
+        <!-- Registration Options (Hidden initially) -->
+        <div id="register-options" class="auth-options hidden">
+            <div class="auth-header">
+                <h3>Registration Options</h3>
+                <button id="close-register-options" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <button id="candidate-register-option" class="btn-register-option">Candidate Registration</button>
+            <button id="voter-register-option" class="btn-register-option">Voter Registration</button>
+        </div>
+
+        <!-- Recent News & Updates Section -->
+        <section class="news-section">
+            <div class="container">
+                <h2 class="section-title">Recent News & Updates</h2>
+                <div class="news-cards">
+                    <div class="news-card">
+                        <div class="news-date">Mar 1, 2025</div>
+                        <h3>Class Election Announced</h3>
+                        <p>The Class elections have been scheduled for March 15, 2025. Candidate registration opens From March 10.</p>
+                        <a href="#" class="read-more">Read More</a>
+                    </div>
+                    <div class="news-card">
+                        <div class="news-date">Feb 25, 2025</div>
+                        <h3>Voter ID Verification System Upgraded</h3>
+                        <p>Our voter verification system has been enhanced for improved security and faster processing.</p>
+                        <a href="#" class="read-more">Read More</a>
+                    </div>
+                    <div class="news-card">
+                        <div class="news-date">Feb 18, 2025</div>
+                        <h3>Class Representative Election Results</h3>
+                        <p>The results for the recent class representative elections are now available. Congratulations to all elected members!</p>
+                        <a href="#" class="read-more">Read More</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="testimonials-section">
+            <div class="container">
+                <h2 class="section-title">What People Say About Us</h2>
+                <div class="testimonial-container">
+                    <div class="testimonial">
+                        <div class="testimonial-quote">
+                            <i class="fas fa-quote-left"></i>
+                            <p>The Election Management System made voting incredibly easy and secure. I could track my vote and felt confident in the process.</p>
+                            <i class="fas fa-quote-right"></i>
+                        </div>
+                        <div class="testimonial-author">
+                            <img src="{% static 'core/voter1.jpg' %}" alt="Voter" class="testimonial-img">
+                            <div>
+                                <h4>Arun Asadh</h4>
+                                <p>Voter</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial">
+                        <div class="testimonial-quote">
+                            <i class="fas fa-quote-left"></i>
+                            <p>As a candidate, the platform provided me with all the tools I needed to manage my campaign and connect with voters.</p>
+                            <i class="fas fa-quote-right"></i>
+                        </div>
+                        <div class="testimonial-author">
+                            <img src="{% static 'core/candidate2.jpg' %}" alt="Candidate" class="testimonial-img">
+                            <div>
+                                <h4>Tanvi Biramane</h4>
+                                <p> Candidate</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial">
+                        <div class="testimonial-quote">
+                            <i class="fas fa-quote-left"></i>
+                            <p>The transparency of this system has greatly improved public trust in our elections. Results are clear and verifiable.</p>
+                            <i class="fas fa-quote-right"></i>
+                        </div>
+                        <div class="testimonial-author">
+                            <img src="{% static 'core/voter1.jpg' %}" alt="Official" class="testimonial-img">
+                            <div>
+                                <h4>Pranav Katkar</h4>
+                                <p>Voter</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>Contact Information</h3>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> info@electionms.gov</li>
+                    <li><i class="fas fa-phone"></i> +1 (555) 123-4567</li>
+                    
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Accessibility</a></li>
+                    <li><a href="#">Report Issues</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Connect With Us</h3>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>Legal</h3>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Use</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2024-2025 Election Management System. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+   
+</body>
+
+</html>

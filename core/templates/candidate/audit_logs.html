@@ -1,0 +1,335 @@
+<!-- candidate/audit_logs.html -->
+{% extends 'core/candidate_dashboard.html' %}
+
+{% block content %}
+<div class="audit-container">
+    <div class="audit-header">
+        <h2>Audit Logs</h2>
+        <p>Track your activity and system interactions</p>
+    </div>
+
+    <!-- Search and Filter Controls -->
+    <div class="audit-controls">
+        <div class="search-container">
+            <input type="text" id="audit-search" class="search-input" placeholder="Search logs...">
+        </div>
+        <div class="filter-container">
+            <select id="filter-status" class="filter-select">
+                <option value="all">All Logs</option>
+                <option value="success">Success</option>
+                <option value="failure">Failure</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Audit Logs Table -->
+    <div class="table-wrapper">
+        <table class="audit-table">
+            <thead>
+                <tr>
+                    <th data-sort="action" class="sortable">Action <span class="sort-icon"></span></th>
+                    <th data-sort="details" class="sortable">Details <span class="sort-icon"></span></th>
+                    <th data-sort="timestamp" class="sortable">Timestamp <span class="sort-icon"></span></th>
+                </tr>
+            </thead>
+            <tbody id="audit-logs-body">
+                {% for log in audit_logs %}
+                    <tr class="{% if 'Success' in log.details %}success-log{% else %}failure-log{% endif %}" data-action="{{ log.action }}" data-details="{{ log.details }}" data-timestamp="{{ log.timestamp }}">
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.details }}</td>
+                        <td>{{ log.timestamp }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-controls">
+        <button id="prev-page" class="pagination-btn" disabled>Previous</button>
+        <span id="page-info">Page <span id="current-page">1</span> of <span id="total-pages">1</span></span>
+        <button id="next-page" class="pagination-btn">Next</button>
+    </div>
+
+    <!-- No Data Message -->
+    <p id="no-data-message" class="no-data" style="display: none;">No audit logs match your search or filter criteria.</p>
+</div>
+
+<!-- Add custom styles -->
+<style>
+.audit-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.audit-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.audit-header h2 {
+    color: #1a3c34;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.audit-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.audit-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.search-container, .filter-container {
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-input, .filter-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.search-input:focus, .filter-select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+.audit-table th, .audit-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.audit-table th {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.audit-table th.sortable:hover {
+    background-color: #0056b3;
+}
+
+.audit-table th .sort-icon::after {
+    content: '↕';
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.audit-table th.asc .sort-icon::after {
+    content: '↑';
+}
+
+.audit-table th.desc .sort-icon::after {
+    content: '↓';
+}
+
+.success-log {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.failure-log {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.audit-table tr {
+    transition: background-color 0.3s ease;
+}
+
+.audit-table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.pagination-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.pagination-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .audit-controls {
+        flex-direction: column;
+    }
+
+    .audit-table th, .audit-table td {
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<!-- Add custom JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const logsBody = document.getElementById('audit-logs-body');
+    const searchInput = document.getElementById('audit-search');
+    const filterStatus = document.getElementById('filter-status');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const currentPageSpan = document.getElementById('current-page');
+    const totalPagesSpan = document.getElementById('total-pages');
+    const noDataMessage = document.getElementById('no-data-message');
+
+    let allLogs = Array.from(logsBody.querySelectorAll('tr'));
+    let currentPage = 1;
+    const logsPerPage = 10;
+
+    // Function to filter and sort logs
+    function updateLogs() {
+        const searchQuery = searchInput.value.toLowerCase();
+        const filterValue = filterStatus.value;
+
+        let filteredLogs = allLogs.filter(log => {
+            const action = log.dataset.action.toLowerCase();
+            const details = log.dataset.details.toLowerCase();
+            const timestamp = log.dataset.timestamp.toLowerCase();
+            const matchesSearch = action.includes(searchQuery) || details.includes(searchQuery) || timestamp.includes(searchQuery);
+
+            if (filterValue === 'success') {
+                return matchesSearch && log.classList.contains('success-log');
+            } else if (filterValue === 'failure') {
+                return matchesSearch && log.classList.contains('failure-log');
+            }
+            return matchesSearch;
+        });
+
+        // Sort logs based on current sort settings
+        const sortColumn = document.querySelector('.audit-table th.sort-asc') || document.querySelector('.audit-table th.sort-desc');
+        if (sortColumn) {
+            const column = sortColumn.dataset.sort;
+            const isAsc = sortColumn.classList.contains('sort-asc');
+            filteredLogs.sort((a, b) => {
+                const aValue = a.dataset[column].toLowerCase();
+                const bValue = b.dataset[column].toLowerCase();
+                return isAsc ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+            });
+        }
+
+        // Update pagination
+        const totalLogs = filteredLogs.length;
+        const totalPages = Math.ceil(totalLogs / logsPerPage);
+        totalPagesSpan.textContent = totalPages || 1;
+
+        if (currentPage > totalPages) {
+            currentPage = totalPages || 1;
+        }
+        currentPageSpan.textContent = currentPage;
+
+        // Show logs for current page
+        logsBody.innerHTML = '';
+        const start = (currentPage - 1) * logsPerPage;
+        const end = start + logsPerPage;
+        const logsToShow = filteredLogs.slice(start, end);
+        logsToShow.forEach(log => logsBody.appendChild(log));
+
+        // Show/hide "no data" message
+        noDataMessage.style.display = filteredLogs.length === 0 ? 'block' : 'none';
+
+        // Update pagination buttons
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+    }
+
+    // Sorting functionality
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.dataset.sort;
+            const isAsc = header.classList.contains('sort-asc');
+
+            // Reset all sort classes
+            document.querySelectorAll('.sortable').forEach(h => {
+                h.classList.remove('sort-asc', 'sort-desc');
+            });
+
+            // Set new sort direction
+            header.classList.add(isAsc ? 'sort-desc' : 'sort-asc');
+
+            updateLogs();
+        });
+    });
+
+    // Search and filter functionality
+    searchInput.addEventListener('input', updateLogs);
+    filterStatus.addEventListener('change', () => {
+        currentPage = 1;
+        updateLogs();
+    });
+
+    // Pagination functionality
+    prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            updateLogs();
+        }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+        const totalPages = parseInt(totalPagesSpan.textContent);
+        if (currentPage < totalPages) {
+            currentPage++;
+            updateLogs();
+        }
+    });
+
+    // Initial load
+    updateLogs();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,341 @@
+{% extends 'voter/voter_dashboard.html' %}
+
+{% block content %}
+
+<div class="eligible-elections-container">
+    <div class="elections-header">
+        <h1>Eligible Elections <i class="fas fa-vote-yea"></i></h1>
+        <p>Explore your voting opportunities 🗳️</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-button" onclick="showSection('upcoming')" data-section="upcoming">Upcoming</button>
+        <button class="tab-button" onclick="showSection('ongoing')" data-section="ongoing">Ongoing</button>
+        <button class="tab-button" onclick="showSection('completed')" data-section="completed">Completed</button>
+    </div>
+
+    <!-- Upcoming Elections -->
+    <div id="upcoming" class="election-section">
+        <h2>Upcoming Elections</h2>
+        {% if upcoming_elections %}
+            <div class="election-grid">
+                {% for election in upcoming_elections %}
+                    <div class="election-card">
+                        <h3>{{ election.name }}</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> <strong>Region:</strong> {{ election.region }}</p>
+                        <p><i class="fas fa-calendar-alt"></i> <strong>Start Date:</strong> {{ election.start_date }}</p>
+                        <p><i class="fas fa-calendar-check"></i> <strong>End Date:</strong> {{ election.end_date }}</p>
+                        <p><i class="fas fa-info-circle"></i> <strong>Description:</strong> {{ election.description }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-data">No upcoming elections found.</p>
+        {% endif %}
+    </div>
+
+    <!-- Ongoing Elections (Voting Allowed) -->
+    <div id="ongoing" class="election-section">
+        <h2>Ongoing Elections</h2>
+        {% if ongoing_elections %}
+            <div class="election-grid">
+                {% for election in ongoing_elections %}
+                    <div class="election-card">
+                        <h3>{{ election.name }}</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> <strong>Region:</strong> {{ election.region }}</p>
+                        <p><i class="fas fa-calendar-alt"></i> <strong>Start Date:</strong> {{ election.start_date }}</p>
+                        <p><i class="fas fa-calendar-check"></i> <strong>End Date:</strong> {{ election.end_date }}</p>
+                        <p><i class="fas fa-info-circle"></i> <strong>Description:</strong> {{ election.description }}</p>
+                        <div class="card-actions">
+                            <a href="{% url 'cast_vote' election_id=election.id %}" class="btn btn-primary">Cast Vote</a>
+                            <a href="{% url 'view_candidates' election_id=election.id %}" class="btn btn-secondary">View Candidates</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-data">No ongoing elections available.</p>
+        {% endif %}
+    </div>
+
+    <!-- Completed Elections -->
+    <div id="completed" class="election-section">
+        <h2>Completed Elections</h2>
+        {% if completed_elections %}
+            <div class="election-grid">
+                {% for election in completed_elections %}
+                    <div class="election-card">
+                        <h3>{{ election.name }}</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> <strong>Region:</strong> {{ election.region }}</p>
+                        <p><i class="fas fa-calendar-alt"></i> <strong>Start Date:</strong> {{ election.start_date }}</p>
+                        <p><i class="fas fa-calendar-check"></i> <strong>End Date:</strong> {{ election.end_date }}</p>
+                        <p><i class="fas fa-info-circle"></i> <strong>Description:</strong> {{ election.description }}</p>
+                        <div class="card-actions">
+                            <a href="{% url 'view_results' %}" class="btn btn-primary">View Results</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-data">No completed elections available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- Add custom styles -->
+<style>
+.eligible-elections-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #ffffff, #f0f4f8);
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.elections-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.elections-header h1 {
+    color: #1a3c34;
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.elections-header p {
+    color: #666;
+    font-size: 1.3rem;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.tab-button {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #6c757d;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.tab-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.5);
+}
+
+.tab-button.active {
+    background-color: #007bff;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.5);
+}
+
+.election-section {
+    display: none;
+}
+
+.election-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.election-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.election-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.election-card h3 {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.election-card p {
+    color: #666;
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.election-card p i {
+    color: #007bff;
+}
+
+.card-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.btn-primary {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    font-size: 1.2rem;
+    padding: 1rem;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .eligible-elections-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .elections-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .elections-header p {
+        font-size: 1.1rem;
+    }
+
+    .tabs {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .tab-button {
+        width: 100%;
+        padding: 0.9rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .election-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .election-card {
+        padding: 1.2rem;
+    }
+
+    .btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.95rem;
+    }
+}
+</style>
+
+<!-- Add custom JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tab-button');
+    let activeSection = 'upcoming'; // Default section
+
+    // Show section and set active tab
+    function showSection(section) {
+        // Hide all sections
+        document.querySelectorAll('.election-section').forEach(div => {
+            div.style.display = 'none';
+        });
+        // Show the selected section
+        const targetSection = document.getElementById(section);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+        }
+        activeSection = section;
+
+        // Update active tab
+        tabs.forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.getAttribute('data-section') === section) {
+                tab.classList.add('active');
+            }
+        });
+    }
+
+    // Set default section on load
+    showSection(activeSection);
+
+    // Add click event listeners for tabs
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            showSection(tab.getAttribute('data-section'));
+        });
+    });
+
+    // Add keyboard navigation
+    tabs.forEach(tab => {
+        tab.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                showSection(tab.getAttribute('data-section'));
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

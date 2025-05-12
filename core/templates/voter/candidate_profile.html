@@ -1,0 +1,33 @@
+{% extends "voter/voter_dashboard.html" %}
+
+{% block content %}
+<h2>Candidate Profile</h2>
+
+{% if candidate.profile_image %}
+    <img src="{{ candidate.profile_image.url }}" alt="Profile Image" width="150" height="150">
+{% else %}
+    <p>No profile image uploaded.</p>
+{% endif %}
+
+<p><strong>Name:</strong> {{ candidate.name }}</p>
+<p><strong>Political Party:</strong> {{ candidate.political_party }}</p>
+<p><strong>Email:</strong> {{ candidate.email }}</p>
+<p><strong>Phone:</strong> {{ candidate.phone }}</p>
+<p><strong>Address:</strong> {{ candidate.address }}</p>
+<p><strong>Election Type:</strong> {{ candidate.election_type }}</p>
+<p><strong>Verification Status:</strong> {{ candidate.verification_status }}</p>
+
+{% if candidate.id_proof %}
+    <p><strong>ID Proof:</strong> <a href="{{ candidate.id_proof.url }}" target="_blank">View Document</a></p>
+{% endif %}
+
+<!-- ✅ Add Statement of Purpose (SOP) Here -->
+{% if nomination and nomination.statement_of_purpose %}
+    <h3>Statement of Purpose</h3>
+    <p>{{ nomination.statement_of_purpose }}</p>
+{% else %}
+    <p><strong>Statement of Purpose:</strong> Not provided.</p>
+{% endif %}
+
+<a href="{% url 'view_candidates' election_id=candidate.nominations.first.election.id %}">Back to Candidates</a>
+{% endblock %}

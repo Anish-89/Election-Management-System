@@ -1,0 +1,512 @@
+{% extends 'core/admin_dashboard.html' %}
+
+{% block content %}
+<div class="result-detail-container">
+    <div class="result-header">
+        <h1>{{ election.name }} - {{ election.election_type }} <i class="fas fa-trophy"></i></h1>
+        <p>Detailed election outcomes and insights 📊</p>
+    </div>
+
+    <div class="result-card">
+        <div class="result-overview">
+            <p><i class="fas fa-users"></i> <strong>Total Voters:</strong> {{ election.total_voters }}</p>
+            <p><i class="fas fa-vote-yea"></i> <strong>Total Votes Cast:</strong> {{ election.total_votes_cast }}</p>
+            {% if election.winner %}
+                <h3><i class="fas fa-crown"></i> Winner: {{ election.winner }}</h3>
+            {% else %}
+                <p><i class="fas fa-hourglass"></i> <strong>Winner:</strong> Not yet determined</p>
+            {% endif %}
+            <button class="btn btn-secondary" onclick="downloadData()">Download Results <i class="fas fa-download"></i></button>
+        </div>
+
+        <div class="result-table">
+            <h3>Candidate Results</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Candidate Name</th>
+                        <th>Votes Received</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in election.results %}
+                        <tr>
+                            <td>{{ result.candidate__name }}</td>
+                            <td>{{ result.total_votes }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="2">No votes recorded.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="chart-controls">
+            <button class="chart-toggle active" onclick="toggleChart('votes')">Votes Distribution</button>
+            <button class="chart-toggle" onclick="toggleChart('turnout')">Voter Turnout</button>
+        </div>
+
+        <div class="result-charts">
+            <div class="chart-container" id="votesChartContainer">
+                <h3>Votes Distribution</h3>
+                <canvas id="votesChart" height="300"></canvas>
+            </div>
+            <div class="chart-container" id="turnoutChartContainer" style="display: none;">
+                <h3>Voter Turnout</h3>
+                <canvas id="turnoutChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <a href="{% url 'view_results' %}" class="btn btn-back">Back to Results <i class="fas fa-arrow-left"></i></a>
+</div>
+
+<!-- Add Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- Add Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Add custom styles -->
+<style>
+.result-detail-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #ffffff, #e9ecef);
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.result-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.result-header h1 {
+    color: #1a3c34;
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.result-header p {
+    color: #666;
+    font-size: 1.3rem;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.result-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #007bff;
+}
+
+.result-overview {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f9f9f9, #ffffff);
+    border-radius: 8px;
+}
+
+.result-overview p {
+    color: #666;
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.result-overview p i {
+    color: #007bff;
+}
+
+.result-overview h3 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    margin: 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.result-table {
+    margin-bottom: 2rem;
+}
+
+.result-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f8f9fa;
+}
+
+.result-table th, .result-table td {
+    padding: 1rem;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.result-table th {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+}
+
+.result-table tr:nth-child(even) {
+    background-color: #f1f1f1;
+}
+
+.chart-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chart-toggle {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    background: #6c757d;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.chart-toggle.active {
+    background-color: #007bff;
+}
+
+.chart-toggle:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+.result-charts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    max-height: 350px;
+    overflow: hidden;
+}
+
+.chart-container {
+    background: linear-gradient(135deg, #ffffff, #f9f9f9);
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow: auto;
+}
+
+.chart-container h3 {
+    color: #2c3e50;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-back {
+    background-color: #6c757d;
+    color: white;
+    margin-top: 1rem;
+    display: block;
+    text-align: center;
+}
+
+.btn-back:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    margin-top: 1rem;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .result-detail-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .result-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .result-header p {
+        font-size: 1.1rem;
+    }
+
+    .result-overview p {
+        font-size: 1.1rem;
+    }
+
+    .result-overview h3 {
+        font-size: 1.6rem;
+    }
+
+    .chart-controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .chart-toggle {
+        width: 100%;
+        text-align: center;
+    }
+
+    .result-charts {
+        grid-template-columns: 1fr;
+        max-height: 320px;
+    }
+
+    .chart-container {
+        max-height: 300px;
+        padding: 1.2rem;
+    }
+
+    .btn {
+        font-size: 1rem;
+        padding: 0.7rem 1.2rem;
+    }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<!-- Add custom JavaScript -->
+<script>
+    // Move downloadData function to global scope
+    function downloadData() {
+        console.log('Download function called');
+        let csvContent = "Candidate Name,Votes Received\n";
+        {% for result in election.results %}
+            csvContent += "{{ result.candidate__name|safe }},{{ result.total_votes }}\n";
+        {% endfor %}
+        console.log('CSV Content:', csvContent); // Log CSV content for debugging
+
+        if (!csvContent.trim()) {
+            console.error('No data to download');
+            alert('No data available for download.');
+            return;
+        }
+
+        try {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `election_results_{{ election.name|slugify }}.csv`);
+            document.body.appendChild(link);
+            // Delayed click to ensure DOM update
+            setTimeout(() => {
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                console.log('Download attempted with Blob');
+            }, 0);
+        } catch (blobError) {
+            console.error('Blob download failed:', blobError);
+            // Fallback to data URI
+            const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `election_results_{{ election.name|slugify }}.csv`);
+            document.body.appendChild(link);
+            setTimeout(() => {
+                link.click();
+                document.body.removeChild(link);
+                console.log('Fallback download attempted with URI');
+            }, 0);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctxVotes = document.getElementById('votesChart').getContext('2d');
+        const ctxTurnout = document.getElementById('turnoutChart').getContext('2d');
+        const votesContainer = document.getElementById('votesChartContainer');
+        const turnoutContainer = document.getElementById('turnoutChartContainer');
+
+        if (!votesContainer || !turnoutContainer) {
+            console.error('Chart containers not found:', { votesContainer, turnoutContainer });
+        }
+
+        // Dynamic colors for bar chart based on number of candidates
+        const labelColors = ['rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)', 'rgba(255, 206, 86, 0.5)', 
+                            'rgba(75, 192, 192, 0.5)', 'rgba(153, 102, 255, 0.5)', 'rgba(255, 159, 64, 0.5)'];
+        const borderColors = ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 
+                             'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'];
+        const hoverColors = ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)', 
+                            'rgba(75, 192, 192, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)'];
+
+        // Bar Chart - Votes per Candidate
+        const votesChart = new Chart(ctxVotes, {
+            type: 'bar',
+            data: {
+                labels: {{ election.chart_labels|safe }},
+                datasets: [{
+                    label: 'Votes Received',
+                    data: {{ election.chart_data|safe }},
+                    backgroundColor: labelColors.slice(0, {{ election.chart_labels|length|default:1 }}),
+                    borderColor: borderColors.slice(0, {{ election.chart_labels|length|default:1 }}),
+                    borderWidth: 1,
+                    hoverBackgroundColor: hoverColors.slice(0, {{ election.chart_labels|length|default:1 }})
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Votes'
+                        },
+                        ticks: { maxTicksLimit: 5 }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Candidates'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.label}: ${tooltipItem.raw} votes`;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                layout: {
+                    padding: { top: 10, bottom: 10 }
+                }
+            }
+        });
+
+        // Pie Chart - Voter Turnout with different colors
+        const turnoutChart = new Chart(ctxTurnout, {
+            type: 'pie',
+            data: {
+                labels: ['Voted', 'Not Voted'],
+                datasets: [{
+                    data: [{{ election.total_votes_cast }}, {{ election.total_voters|default:0 }} - {{ election.total_votes_cast|default:0 }}],
+                    backgroundColor: ['#ff6384', '#36a2eb'],
+                    hoverBackgroundColor: ['#ff4d6a', '#2a7bc8']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                const total = tooltipItem.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const value = tooltipItem.raw;
+                                const percentage = ((value / total) * 100).toFixed(2);
+                                return `${tooltipItem.label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                layout: {
+                    padding: { top: 10, bottom: 10 }
+                }
+            }
+        });
+
+        // Toggle Chart Views (Enhanced)
+        function toggleChart(type) {
+            console.log(`Attempting to toggle to ${type}`);
+            const toggles = document.querySelectorAll('.chart-toggle');
+            if (!toggles.length) {
+                console.error('No toggle buttons found');
+                return;
+            }
+            toggles.forEach(toggle => toggle.classList.remove('active'));
+            try {
+                if (type === 'votes') {
+                    votesContainer.style.display = 'block';
+                    turnoutContainer.style.display = 'none';
+                    document.querySelector('[onclick="toggleChart(\'votes\')"]').classList.add('active');
+                    console.log('Switched to Votes Distribution');
+                } else if (type === 'turnout') {
+                    votesContainer.style.display = 'none';
+                    turnoutContainer.style.display = 'block';
+                    document.querySelector('[onclick="toggleChart(\'turnout\')"]').classList.add('active');
+                    console.log('Switched to Voter Turnout');
+                } else {
+                    console.error('Invalid chart type:', type);
+                }
+            } catch (error) {
+                console.error('Toggle error:', error);
+            }
+        }
+
+        // Add event listeners directly to ensure functionality
+        document.querySelectorAll('.chart-toggle').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const type = e.target.getAttribute('onclick').match(/toggleChart\('(\w+)'\)/)[1];
+                toggleChart(type);
+            });
+        });
+
+        // Initial Chart Display
+        toggleChart('votes');
+    });
+</script>
+
+{% endblock %}

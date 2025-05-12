@@ -1,0 +1,44 @@
+{% extends 'core/home.html' %}
+{% block content %}
+<h2>Live Election Results</h2>
+
+{% for election in active_elections %}
+    <div class="election-container">
+        <h3>{{ election.name }}</h3>
+        <p>Voter Turnout: <span id="turnout-{{ election.id }}">Loading...</span>%</p>
+        <canvas id="chart-{{ election.id }}"></canvas>
+    </div>
+
+    <script>
+        let socket{{ election.id }} = new WebSocket(`ws://${window.location.host}/ws/election/{{ election.id }}/`);
+
+        socket{{ election.id }}.onmessage = function(event) {
+            let data = JSON.parse(event.data);
+
+            document.getElementById("turnout-{{ election.id }}").innerText = data.turnout;
+
+            let labels = data.candidates.map(c => c.name);
+            let values = data.candidates.map(c => c.votes);
+
+            let ctx = document.getElementById("chart-{{ election.id }}").getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Live Vote Trend',
+                        data: values,
+                        backgroundColor: 'blue'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        };
+    </script>
+{% endfor %}
+
+{% endblock %}

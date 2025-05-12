@@ -1,0 +1,151 @@
+{% extends 'core/admin_dashboard.html' %}
+{% block content %}
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #222;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        tr:hover {
+            background: #f1f1f1;
+        }
+        .actions a {
+            color: red;
+            margin-right: 10px;
+            text-decoration: none;
+        }
+        .actions a:hover {
+            text-decoration: underline;
+        }
+        .search-box {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .search-box input {
+            width: 60%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .verify-btn {
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<div class="container">
+    <h1>Voter Management</h1>
+    <div class="search-box">
+        <input type="text" id="search" placeholder="Search voters...">
+    </div>
+    <table id="voterTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">ID</th>
+                <th onclick="sortTable(1)">Name</th>
+                <th onclick="sortTable(2)">Email</th>
+                <th onclick="sortTable(3)">Election</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for voter in voters %}
+            <tr>
+                <td>{{ voter.id }}</td>
+                <td>{{ voter.name }}</td>
+                <td>{{ voter.email }}</td>
+                <td>{{ voter.election_type }}</td>
+                <td>{{ voter.verification_status }}</td>
+                <td class="actions">
+                    <a href="{% url 'voter_delete' voter.id %}" onclick="return confirm('Are you sure?')">
+                        <i class="fa fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No voters found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="container">
+    <h2>Pending Voter Approvals</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Election</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for voter in voters %}
+                {% if voter.verification_status == "Pending" %}
+                <tr>
+                    <td>{{ voter.name }}</td>
+                    <td>{{ voter.email }}</td>
+                    <td>{{ voter.election_type }}</td>
+                    <td>
+                        <button class="verify-btn" onclick="location.href='{% url 'verify_voter' voter.id %}'">Verify</button>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    function sortTable(n) {
+        let table = document.getElementById("voterTable");
+        let rows = Array.from(table.rows).slice(1);
+        rows.sort((a, b) => a.cells[n].innerText.localeCompare(b.cells[n].innerText));
+        rows.forEach(row => table.appendChild(row));
+    }
+    
+    document.getElementById("search").addEventListener("keyup", function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll("#voterTable tbody tr");
+        rows.forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}
