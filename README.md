@@ -79,7 +79,7 @@ An end-to-end secure, role-based online election management platform built using
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/election-management-system.git
+git clone https://github.com/Anish-89/election-management-system.git
 cd election-management-system
 
 # Create virtual environment
@@ -98,16 +98,19 @@ python manage.py createsuperuser
 
 # Run the server
 python manage.py runserver
-
+``` 
 ---
+
 ## 📋 Usage Instructions
-- **Admin Login:** Access the backend to monitor and manage elections.
-- **Candidate Login:** Submit candidacy and view election status.
-- **Voter Login:** Cast vote during active elections and check results.
----
-## 🧑‍💻 Developed By
-Anishkumar Jha 
-Final Year BSc IT Student, VIVA College, Mumbai
-📧 anishkjha89@gmail.com
-🔗 LinkedIn
+- **Admin Login** : Access the backend to monitor and manage elections.
+- **Candidate Login**:Submit candidacy and view election status.
+- **Voter Login**: Cast vote during active elections and check results.
 
+---
+
+
+## 🧑‍💻 Developed By
+Anishkumar Jha  
+Final Year BSc IT Student, VIVA College, Mumbai  
+📧 anishkjha89@gmail.com  
+🔗 [LinkedIn](https://www.linkedin.com/in/anishkumar-jha-bba510259)
